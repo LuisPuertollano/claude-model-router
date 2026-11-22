@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>model-router · el modelo justo en Claude Code</title>
+<meta name="description" content="Mod para Claude Code que elige modelo y esfuerzo por conversación, siguiendo la guía de Anthropic, sin reprocesar el contexto a tus espaldas.">
+<style>
+  :root {
+    --bg: #f6f5f2; --card: #ffffff; --ink: #22211e; --muted: #6b6860; --line: #e2dfd8;
+    --accent: #c4613f; --accent-soft: #fbe9df; --ok: #3f7a3e; --ok-soft: #e7f0e6;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b1a18; --card: #24231f; --ink: #ecebe6; --muted: #a4a097; --line: #37352f;
+            --accent: #e48a68; --accent-soft: #3a2a22; --ok: #8cc08a; --ok-soft: #233022; }
+    .shot { background: #f6f5f2; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 17px/1.6 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 72px 0 40px; }
+  .tag { display: inline-block; font: 600 13px var(--mono); color: var(--accent);
+         background: var(--accent-soft); padding: 4px 10px; border-radius: 99px; }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.08; margin: 18px 0 16px; letter-spacing: -0.02em; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lead { font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 0 28px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 600; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { border: 1px solid var(--line); color: var(--ink); background: var(--card); }
+  .shot { width: 100%; height: auto; display: block; border-radius: 16px; border: 1px solid var(--line); }
+  section { padding: 40px 0; }
+  h2 { font-size: 28px; margin: 0 0 18px; letter-spacing: -0.01em; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 16px; overflow: hidden;
+          border: 1px solid var(--line); font-size: 15.5px; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  code, pre { font-family: var(--mono); }
+  code { background: var(--accent-soft); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
+        overflow-x: auto; font-size: 14.5px; margin: 8px 0 16px; }
+  .rule { background: var(--ok-soft); border: 1px solid var(--ok); color: var(--ink); border-radius: 16px; padding: 22px; }
+  .rule strong { color: var(--ok); }
+  footer { padding: 40px 0 60px; color: var(--muted); font-size: 14px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="tag">mod para Claude Code</span>
+    <h1>El modelo <em>justo</em> para cada conversación.</h1>
+    <p class="lead">Haiku para lo simple, Sonnet para lo acotado, Opus por defecto, Fable para lo ambicioso. <strong>model-router</strong> lo elige siguiendo la guía de Anthropic y nunca reprocesa tu contexto sin preguntarte.</p>
+    <div class="cta">
+      <a class="btn primary" href="#instalar">Instalar</a>
+      <a class="btn ghost" href="https://github.com/LuisPuertollano/claude-model-router">Ver en GitHub</a>
+    </div>
+  </header>
+
+  <img class="shot" src="img/footer.svg" alt="El botón del enrutador en el pie del cuadro de texto, junto al selector de modelo">
+
+  <section>
+    <h2>Qué hace</h2>
+    <div class="grid">
+      <div class="card"><h3>Un botón por conversación</h3><p>No → sugerir → auto. Cada conversación recuerda su modo y su modelo; las nuevas empiezan apagadas.</p></div>
+      <div class="card"><h3>Clasifica con Haiku</h3><p>Modelo y esfuerzo según la guía de Anthropic y cuatro preguntas: ¿ida y vuelta? ¿un error sale caro? ¿trabajo largo y crítico?</p></div>
+      <div class="card"><h3>Subagentes baratos</h3><p>Explore a Haiku; los demás, según la tarea y nunca por encima del modelo de la conversación.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sin reenvíos caros</h2>
+    <div class="rule"><p style="margin:0">Cambiar de modelo a mitad de conversación obliga a <strong>reprocesar todo el contexto</strong>, porque la caché es de cada modelo. Por eso model-router solo cambia solo en el <strong>primer mensaje</strong>. Después sugiere, enseña cuántos tokens costaría, y espera a que pulses <em>Cambiar</em>.</p></div>
+    <p></p>
+    <img class="shot" src="img/band.svg" alt="Sugerencia con el coste en tokens de cambiar de modelo">
+    <p></p>
+    <img class="shot" src="img/flow.svg" alt="Esquema: el primer mensaje se aplica solo; después solo se sugiere">
+  </section>
+
+  <section id="instalar">
+    <h2>Instalar</h2>
+    <p>En una sesión de Claude Code en el terminal:</p>
+    <pre>/plugin install model-router --marketplace LuisPuertollano/claude-model-router</pre>
+    <p>Responde <code>y</code> a <em>Add marketplace?</em> y elige el ámbito <em>user</em>. Desde una consola:</p>
+    <pre>claude plugin install model-router --marketplace LuisPuertollano/claude-model-router</pre>
+    <p>En la app de escritorio (pestaña Code): <strong>+</strong> junto al cuadro de texto → <strong>Plugins</strong> → <strong>Add marketplace</strong> con <code>LuisPuertollano/claude-model-router</code> → <strong>Add plugin</strong>.</p>
+  </section>
+
+  <section>
+    <h2>Uso</h2>
+    <table>
+      <tr><th>Control</th><th>Efecto (solo en esta conversación)</th></tr>
+      <tr><td>Modelo auto: no</td><td>Apagado: manda el modelo de la app.</td></tr>
+      <tr><td>Modelo: sugerir</td><td>Muestra la sugerencia; nada cambia sin <em>Cambiar</em>.</td></tr>
+      <tr><td>Auto: Sonnet·medium</td><td>Elige en el primer mensaje; luego solo sugiere subir, con su coste.</td></tr>
+      <tr><td><code>/modelo opus high</code></td><td>Fija modelo y esfuerzo.</td></tr>
+      <tr><td><code>/modelo libre</code></td><td>Vuelve al modelo de la app.</td></tr>
+    </table>
+  </section>
+
+  <footer>
+    MIT · Basado en <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> de Anthropic. Proyecto independiente, sin relación oficial con Anthropic.
+  </footer>
+</div>
+</body>
+</html>

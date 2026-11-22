@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="170" viewBox="0 0 880 170" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Sugerencia con el coste de cambiar de modelo a mitad de conversación</title>
+  <rect width="880" height="170" rx="16" fill="#f6f5f2"/>
+  <rect x="24" y="22" width="832" height="74" rx="12" fill="#eeece7"/>
+  <text x="44" y="52" font-size="15" fill="#5f5c55">Sugerido: <tspan font-weight="600" fill="#2b2a27">Opus 5.5 · high</tspan> · depurar fallo sin causa conocida ·</text>
+  <text x="44" y="78" font-size="15" fill="#9c3f1f">cambiar reprocesa ~120K tokens de contexto (≈$0.60)</text>
+  <rect x="604" y="40" width="96" height="36" rx="10" fill="#ffffff" stroke="#cfcbc2"/>
+  <text x="652" y="63" font-size="15" text-anchor="middle" fill="#2b2a27">Cambiar</text>
+  <rect x="712" y="40" width="128" height="36" rx="10" fill="#ffffff" stroke="#cfcbc2"/>
+  <text x="776" y="63" font-size="15" text-anchor="middle" fill="#2b2a27">Seguir igual</text>
+  <rect x="24" y="110" width="832" height="44" rx="12" fill="#ffffff" stroke="#d9d6cf"/>
+  <text x="44" y="138" font-size="15" fill="#8a877f">Nada cambia hasta que pulsas «Cambiar».</text>
+</svg>
