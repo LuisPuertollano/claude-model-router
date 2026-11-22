@@ -1,6 +1,7 @@
 ---
 name: model-advisor
-description: Recommends which Claude model (Haiku, Sonnet, Opus, Fable) and effort level (low, medium, high, xhigh) fit the task at hand, following Anthropic's model-selection guide, and prepares a handoff to a new conversation when switching mid-conversation would re-process the whole context. Use at the start of any new task in Claude chat or Cowork, when the person asks which model or effort to use, says a model is too slow, too expensive or not good enough, or asks whether to switch model. Also when they write in Spanish, German or French ("qué modelo uso", "welches Modell", "quel modèle"). Do not use inside Claude Code when the model-router mod is installed: its footer selector already does this.
+description: >-
+  Recommends which Claude model (Haiku, Sonnet, Opus, Fable) and effort level (low, medium, high, xhigh) fit the task at hand, following Anthropic's model-selection guide, and prepares a handoff to a new conversation when switching mid-conversation would re-process the whole context. Use at the start of any new task in Claude chat or Cowork, when the person asks which model or effort to use, says a model is too slow, too expensive or not good enough, or asks whether to switch model. Also when they write in Spanish, German or French ("qué modelo uso", "welches Modell", "quel modèle"). Do not use inside Claude Code when the model-router mod is installed: its footer selector already does this.
 ---
 
 # Model advisor
