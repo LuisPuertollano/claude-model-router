@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>model-router · el modelo justo en Claude Code</title>
-<meta name="description" content="Mod para Claude Code que elige modelo y esfuerzo por conversación, siguiendo la guía de Anthropic, sin reprocesar el contexto a tus espaldas.">
+<title>model-router · the right Claude model</title>
+<meta name="description" content="A Claude Code mod that picks model and effort per conversation, following Anthropic's guide, without re-processing your context behind your back. Plus a model advisor for Claude chat and Cowork.">
 <style>
   :root {
     --bg: #f6f5f2; --card: #ffffff; --ink: #22211e; --muted: #6b6860; --line: #e2dfd8;
@@ -14,29 +14,35 @@
   @media (prefers-color-scheme: dark) {
     :root { --bg: #1b1a18; --card: #24231f; --ink: #ecebe6; --muted: #a4a097; --line: #37352f;
             --accent: #e48a68; --accent-soft: #3a2a22; --ok: #8cc08a; --ok-soft: #233022; }
-    .shot { background: #f6f5f2; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
          font: 17px/1.6 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 0 16px; }
-  header { padding: 72px 0 40px; }
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; gap: 12px; }
+  nav .brand { font: 600 15px var(--mono); color: var(--ink); text-decoration: none; }
+  nav label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+  nav select { font: inherit; font-size: 14px; color: var(--ink); background: var(--card); border: 1px solid var(--line);
+               border-radius: 10px; padding: 6px 10px; }
+  header { padding: 40px 0 36px; }
   .tag { display: inline-block; font: 600 13px var(--mono); color: var(--accent);
          background: var(--accent-soft); padding: 4px 10px; border-radius: 99px; }
   h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.08; margin: 18px 0 16px; letter-spacing: -0.02em; }
   h1 em { font-style: normal; color: var(--accent); }
-  .lead { font-size: 20px; color: var(--muted); max-width: 680px; margin: 0 0 28px; }
+  .lead { font-size: 20px; color: var(--muted); max-width: 700px; margin: 0 0 28px; }
   .cta { display: flex; flex-wrap: wrap; gap: 12px; }
   .btn { display: inline-block; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 600; }
   .btn.primary { background: var(--accent); color: #fff; }
   .btn.ghost { border: 1px solid var(--line); color: var(--ink); background: var(--card); }
-  .shot { width: 100%; height: auto; display: block; border-radius: 16px; border: 1px solid var(--line); }
-  section { padding: 40px 0; }
+  .shot { width: 100%; height: auto; display: block; border-radius: 16px; border: 1px solid var(--line); background: #f6f5f2; margin: 8px 0 16px; }
+  section { padding: 36px 0; }
   h2 { font-size: 28px; margin: 0 0 18px; letter-spacing: -0.01em; }
+  h3 { font-size: 18px; margin: 22px 0 6px; }
   .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
-  .card h3 { margin: 0 0 6px; font-size: 18px; }
+  .card h3 { margin: 0 0 6px; }
   .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
+  .card .where { font: 600 12px var(--mono); color: var(--accent); margin-bottom: 8px; display: block; }
   table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 16px; overflow: hidden;
           border: 1px solid var(--line); font-size: 15.5px; }
   th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
@@ -45,69 +51,213 @@
   code, pre { font-family: var(--mono); }
   code { background: var(--accent-soft); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
   pre { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px;
-        overflow-x: auto; font-size: 14.5px; margin: 8px 0 16px; }
-  .rule { background: var(--ok-soft); border: 1px solid var(--ok); color: var(--ink); border-radius: 16px; padding: 22px; }
+        overflow-x: auto; font-size: 14.5px; margin: 8px 0 16px; white-space: pre-wrap; }
+  .rule { background: var(--ok-soft); border: 1px solid var(--ok); border-radius: 16px; padding: 22px; }
   .rule strong { color: var(--ok); }
   footer { padding: 40px 0 60px; color: var(--muted); font-size: 14px; }
   a { color: var(--accent); }
+  @media (max-width: 520px) { table { font-size: 14px; } th, td { padding: 10px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <nav>
+    <a class="brand" href="https://github.com/LuisPuertollano/claude-model-router">model-router</a>
+    <label><span data-i="langLabel">Language</span>
+      <select id="lang" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+      </select>
+    </label>
+  </nav>
+
   <header>
-    <span class="tag">mod para Claude Code</span>
-    <h1>El modelo <em>justo</em> para cada conversación.</h1>
-    <p class="lead">Haiku para lo simple, Sonnet para lo acotado, Opus por defecto, Fable para lo ambicioso. <strong>model-router</strong> lo elige siguiendo la guía de Anthropic y nunca reprocesa tu contexto sin preguntarte.</p>
+    <span class="tag" data-i="tag">Claude Code mod · chat & Cowork advisor</span>
+    <h1 data-i="h1" data-html>The <em>right</em> model for each conversation.</h1>
+    <p class="lead" data-i="lead">Haiku for the simple, Sonnet for the scoped, Opus by default, Fable for the ambitious. model-router picks following Anthropic's guide and never re-processes your context without asking.</p>
     <div class="cta">
-      <a class="btn primary" href="#instalar">Instalar</a>
-      <a class="btn ghost" href="https://github.com/LuisPuertollano/claude-model-router">Ver en GitHub</a>
+      <a class="btn primary" href="#install" data-i="ctaInstall">Install</a>
+      <a class="btn ghost" href="https://github.com/LuisPuertollano/claude-model-router" data-i="ctaGithub">View on GitHub</a>
     </div>
   </header>
 
-  <img class="shot" src="img/footer.svg" alt="El botón del enrutador en el pie del cuadro de texto, junto al selector de modelo">
+  <img class="shot" data-img="footer" src="img/en/footer.svg" alt="">
 
   <section>
-    <h2>Qué hace</h2>
+    <h2 data-i="whatH">What it does</h2>
     <div class="grid">
-      <div class="card"><h3>Un botón por conversación</h3><p>No → sugerir → auto. Cada conversación recuerda su modo y su modelo; las nuevas empiezan apagadas.</p></div>
-      <div class="card"><h3>Clasifica con Haiku</h3><p>Modelo y esfuerzo según la guía de Anthropic y cuatro preguntas: ¿ida y vuelta? ¿un error sale caro? ¿trabajo largo y crítico?</p></div>
-      <div class="card"><h3>Subagentes baratos</h3><p>Explore a Haiku; los demás, según la tarea y nunca por encima del modelo de la conversación.</p></div>
+      <div class="card"><span class="where">Claude Code</span><h3 data-i="c1h">Two dropdowns by the model picker</h3><p data-i="c1p">Mode for this conversation (app's model, Suggest, Auto, or pin a model) and the language of the mod. Each conversation remembers its own; new ones start off.</p></div>
+      <div class="card"><span class="where">Claude Code</span><h3 data-i="c2h">Classified by Haiku</h3><p data-i="c2p">Model and effort from Anthropic's guide and four questions: back-and-forth? costly mistake? long critical job? otherwise medium. Generic subagents go to cheaper models.</p></div>
+      <div class="card"><span class="where">Chat · Cowork</span><h3 data-i="c3h">Model advisor skill</h3><p data-i="c3p">Tells you in one line which model and effort to pick, and writes a handoff for a new conversation when switching mid-way would re-process everything. In Cowork, a Haiku reader subagent does the long reading.</p></div>
     </div>
   </section>
 
   <section>
-    <h2>Sin reenvíos caros</h2>
-    <div class="rule"><p style="margin:0">Cambiar de modelo a mitad de conversación obliga a <strong>reprocesar todo el contexto</strong>, porque la caché es de cada modelo. Por eso model-router solo cambia solo en el <strong>primer mensaje</strong>. Después sugiere, enseña cuántos tokens costaría, y espera a que pulses <em>Cambiar</em>.</p></div>
-    <p></p>
-    <img class="shot" src="img/band.svg" alt="Sugerencia con el coste en tokens de cambiar de modelo">
-    <p></p>
-    <img class="shot" src="img/flow.svg" alt="Esquema: el primer mensaje se aplica solo; después solo se sugiere">
+    <h2 data-i="costH">No expensive re-sends</h2>
+    <div class="rule"><p style="margin:0" data-i="costP" data-html>Switching model mid-conversation <strong>re-processes the whole context</strong>, because the cache belongs to each model. So model-router only switches by itself on the <strong>first message</strong>. After that it suggests, shows how many tokens it would cost, and waits for you to press <em>Switch</em>.</p></div>
+    <img class="shot" data-img="band" src="img/en/band.svg" alt="">
+    <img class="shot" data-img="flow" src="img/en/flow.svg" alt="">
   </section>
 
-  <section id="instalar">
-    <h2>Instalar</h2>
-    <p>En una sesión de Claude Code en el terminal:</p>
+  <section id="install">
+    <h2 data-i="installH">Install</h2>
+    <h3 data-i="installCodeH">Claude Code (terminal)</h3>
     <pre>/plugin install model-router --marketplace LuisPuertollano/claude-model-router</pre>
-    <p>Responde <code>y</code> a <em>Add marketplace?</em> y elige el ámbito <em>user</em>. Desde una consola:</p>
-    <pre>claude plugin install model-router --marketplace LuisPuertollano/claude-model-router</pre>
-    <p>En la app de escritorio (pestaña Code): <strong>+</strong> junto al cuadro de texto → <strong>Plugins</strong> → <strong>Add marketplace</strong> con <code>LuisPuertollano/claude-model-router</code> → <strong>Add plugin</strong>.</p>
+    <p data-i="installCodeP" data-html>Answer <code>y</code> to <em>Add marketplace?</em> and choose the <em>user</em> scope. From a shell: <code>claude plugin install model-router --marketplace LuisPuertollano/claude-model-router</code></p>
+    <h3 data-i="installAppH">Desktop app, Chat and Cowork</h3>
+    <p data-i="installAppP" data-html>Click <strong>+</strong> next to the prompt box → <strong>Plugins</strong> → <strong>Add marketplace</strong> with <code>LuisPuertollano/claude-model-router</code> → <strong>Add plugin</strong>. Chat and Cowork load the <em>model-advisor</em> skill (and, in Cowork, the <em>haiku-reader</em> subagent); the dropdowns are Claude Code only.</p>
+    <h3 data-i="prefH">Optional: make the advisor proactive in Chat and Cowork</h3>
+    <p data-i="prefP">Paste this into Settings → Profile → personal preferences on claude.ai:</p>
+    <pre data-i="prefText">At the start of each new task, use the model-advisor skill to tell me in one line which Claude model and effort level fit it. If switching mid-conversation would re-process a long context, suggest a new conversation with a handoff instead.</pre>
   </section>
 
   <section>
-    <h2>Uso</h2>
+    <h2 data-i="useH">Use (Claude Code)</h2>
     <table>
-      <tr><th>Control</th><th>Efecto (solo en esta conversación)</th></tr>
-      <tr><td>Modelo auto: no</td><td>Apagado: manda el modelo de la app.</td></tr>
-      <tr><td>Modelo: sugerir</td><td>Muestra la sugerencia; nada cambia sin <em>Cambiar</em>.</td></tr>
-      <tr><td>Auto: Sonnet·medium</td><td>Elige en el primer mensaje; luego solo sugiere subir, con su coste.</td></tr>
-      <tr><td><code>/modelo opus high</code></td><td>Fija modelo y esfuerzo.</td></tr>
-      <tr><td><code>/modelo libre</code></td><td>Vuelve al modelo de la app.</td></tr>
+      <tr><th data-i="thCtl">Control</th><th data-i="thEff">Effect (this conversation only)</th></tr>
+      <tr><td data-i="r1a">Model: app's</td><td data-i="r1b">Off: the model picked in the app is used.</td></tr>
+      <tr><td data-i="r2a">Model: Suggest</td><td data-i="r2b">Shows the suggestion; nothing changes until you press Switch.</td></tr>
+      <tr><td data-i="r3a">Model: Auto</td><td data-i="r3b">Picks on the first message; afterwards only suggests upgrades, with their cost.</td></tr>
+      <tr><td data-i="r4a">Model: Pin Opus…</td><td data-i="r4b">Pins that model in this conversation.</td></tr>
+      <tr><td data-i="r5a">Language: ES · EN · DE · FR</td><td data-i="r5b">Language of the mod (all conversations).</td></tr>
+      <tr><td><code>/modelo opus high</code></td><td data-i="r6b">Pins model and effort.</td></tr>
+      <tr><td><code>/modelo libre</code></td><td data-i="r7b">Back to the app's model.</td></tr>
     </table>
   </section>
 
-  <footer>
-    MIT · Basado en <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> de Anthropic. Proyecto independiente, sin relación oficial con Anthropic.
-  </footer>
+  <footer data-i="foot" data-html>MIT · Based on Anthropic's <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> Independent project, not affiliated with Anthropic.</footer>
 </div>
+
+<script>
+const T = {
+  es: {
+    langLabel: 'Idioma', tag: 'Mod para Claude Code · asesor para chat y Cowork',
+    h1: 'El modelo <em>justo</em> para cada conversación.',
+    lead: 'Haiku para lo simple, Sonnet para lo acotado, Opus por defecto, Fable para lo ambicioso. model-router elige siguiendo la guía de Anthropic y nunca reprocesa tu contexto sin preguntarte.',
+    ctaInstall: 'Instalar', ctaGithub: 'Ver en GitHub', whatH: 'Qué hace',
+    c1h: 'Dos desplegables junto al selector de modelo',
+    c1p: 'El modo de esta conversación (modelo de la app, Sugerir, Auto o fijar un modelo) y el idioma de la mod. Cada conversación recuerda el suyo; las nuevas empiezan apagadas.',
+    c2h: 'Clasifica con Haiku',
+    c2p: 'Modelo y esfuerzo según la guía de Anthropic y cuatro preguntas: ¿ida y vuelta? ¿un error sale caro? ¿trabajo largo y crítico? si no, medium. Los subagentes genéricos van a modelos más baratos.',
+    c3h: 'Skill asesora de modelo',
+    c3p: 'Te dice en una línea qué modelo y esfuerzo elegir, y escribe un traspaso a una conversación nueva cuando cambiar a mitad reprocesaría todo. En Cowork, un subagente lector con Haiku hace la lectura larga.',
+    costH: 'Sin reenvíos caros',
+    costP: 'Cambiar de modelo a mitad de conversación <strong>reprocesa todo el contexto</strong>, porque la caché es de cada modelo. Por eso model-router solo cambia solo en el <strong>primer mensaje</strong>. Después sugiere, enseña cuántos tokens costaría y espera a que pulses <em>Cambiar</em>.',
+    installH: 'Instalar', installCodeH: 'Claude Code (terminal)',
+    installCodeP: 'Responde <code>y</code> a <em>Add marketplace?</em> y elige el ámbito <em>user</em>. Desde una consola: <code>claude plugin install model-router --marketplace LuisPuertollano/claude-model-router</code>',
+    installAppH: 'App de escritorio, Chat y Cowork',
+    installAppP: 'Pulsa <strong>+</strong> junto al cuadro de texto → <strong>Plugins</strong> → <strong>Add marketplace</strong> con <code>LuisPuertollano/claude-model-router</code> → <strong>Add plugin</strong>. El Chat y Cowork cargan la skill <em>model-advisor</em> (y en Cowork el subagente <em>haiku-reader</em>); los desplegables son solo de Claude Code.',
+    prefH: 'Opcional: que el asesor actúe solo en Chat y Cowork',
+    prefP: 'Pega esto en Ajustes → Perfil → preferencias personales de claude.ai:',
+    prefText: 'Al empezar cada tarea nueva, usa la skill model-advisor para decirme en una línea qué modelo de Claude y qué nivel de esfuerzo le van. Si cambiar a mitad de conversación reprocesaría un contexto largo, propón una conversación nueva con un traspaso.',
+    useH: 'Uso (Claude Code)', thCtl: 'Control', thEff: 'Efecto (solo en esta conversación)',
+    r1a: 'Modelo: de la app', r1b: 'Apagado: se usa el modelo elegido en la app.',
+    r2a: 'Modelo: Sugerir', r2b: 'Muestra la sugerencia; nada cambia hasta que pulses Cambiar.',
+    r3a: 'Modelo: Auto', r3b: 'Elige en el primer mensaje; después solo sugiere subir, con su coste.',
+    r4a: 'Modelo: Fijar Opus…', r4b: 'Fija ese modelo en esta conversación.',
+    r5a: 'Idioma: ES · EN · DE · FR', r5b: 'Idioma de la mod (todas las conversaciones).',
+    r6b: 'Fija modelo y esfuerzo.', r7b: 'Vuelve al modelo de la app.',
+    foot: 'MIT · Basado en <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> de Anthropic. Proyecto independiente, sin relación oficial con Anthropic.',
+    alt: { footer: 'Los desplegables del enrutador junto al selector de modelo', band: 'Sugerencia con el coste de cambiar de modelo', flow: 'Cuándo cambia solo y cuándo pregunta' },
+    title: 'model-router · el modelo justo de Claude'
+  },
+  de: {
+    langLabel: 'Sprache', tag: 'Mod für Claude Code · Berater für Chat & Cowork',
+    h1: 'Das <em>richtige</em> Modell für jede Unterhaltung.',
+    lead: 'Haiku fürs Einfache, Sonnet fürs Klar-Umrissene, Opus als Standard, Fable fürs Ehrgeizige. model-router wählt nach Anthropics Leitfaden und verarbeitet deinen Kontext nie ungefragt neu.',
+    ctaInstall: 'Installieren', ctaGithub: 'Auf GitHub ansehen', whatH: 'Was es macht',
+    c1h: 'Zwei Auswahlmenüs neben der Modellauswahl',
+    c1p: 'Der Modus dieser Unterhaltung (Modell der App, Vorschlagen, Auto oder ein Modell fixieren) und die Sprache der Mod. Jede Unterhaltung merkt sich ihren; neue starten aus.',
+    c2h: 'Eingeordnet von Haiku',
+    c2p: 'Modell und Aufwand nach Anthropics Leitfaden und vier Fragen: Hin und her? Teurer Fehler? Lange kritische Arbeit? Sonst medium. Allgemeine Subagenten laufen auf günstigeren Modellen.',
+    c3h: 'Skill als Modellberater',
+    c3p: 'Sagt dir in einer Zeile, welches Modell und welcher Aufwand passen, und schreibt eine Übergabe für eine neue Unterhaltung, wenn ein Wechsel mittendrin alles neu verarbeiten würde. In Cowork übernimmt ein Haiku-Leser-Subagent das lange Lesen.',
+    costH: 'Keine teuren Neuverarbeitungen',
+    costP: 'Ein Modellwechsel mitten in der Unterhaltung <strong>verarbeitet den ganzen Kontext neu</strong>, weil der Cache zu jedem Modell gehört. Deshalb wechselt model-router nur bei der <strong>ersten Nachricht</strong> von selbst. Danach schlägt es vor, zeigt die Token-Kosten und wartet, bis du <em>Wechseln</em> drückst.',
+    installH: 'Installieren', installCodeH: 'Claude Code (Terminal)',
+    installCodeP: 'Beantworte <em>Add marketplace?</em> mit <code>y</code> und wähle den Bereich <em>user</em>. Aus einer Shell: <code>claude plugin install model-router --marketplace LuisPuertollano/claude-model-router</code>',
+    installAppH: 'Desktop-App, Chat und Cowork',
+    installAppP: 'Klicke auf <strong>+</strong> neben dem Eingabefeld → <strong>Plugins</strong> → <strong>Add marketplace</strong> mit <code>LuisPuertollano/claude-model-router</code> → <strong>Add plugin</strong>. Chat und Cowork laden den Skill <em>model-advisor</em> (in Cowork auch den Subagenten <em>haiku-reader</em>); die Auswahlmenüs gibt es nur in Claude Code.',
+    prefH: 'Optional: den Berater in Chat und Cowork proaktiv machen',
+    prefP: 'Füge das unter Einstellungen → Profil → persönliche Präferenzen auf claude.ai ein:',
+    prefText: 'Nutze zu Beginn jeder neuen Aufgabe den Skill model-advisor, um mir in einer Zeile zu sagen, welches Claude-Modell und welcher Aufwand passen. Würde ein Wechsel mitten in der Unterhaltung einen langen Kontext neu verarbeiten, schlage stattdessen eine neue Unterhaltung mit Übergabe vor.',
+    useH: 'Bedienung (Claude Code)', thCtl: 'Steuerung', thEff: 'Wirkung (nur diese Unterhaltung)',
+    r1a: 'Modell: der App', r1b: 'Aus: es gilt das in der App gewählte Modell.',
+    r2a: 'Modell: Vorschlagen', r2b: 'Zeigt den Vorschlag; nichts ändert sich ohne Wechseln.',
+    r3a: 'Modell: Auto', r3b: 'Wählt bei der ersten Nachricht; danach nur Vorschläge nach oben, mit Kosten.',
+    r4a: 'Modell: Opus fixieren…', r4b: 'Fixiert dieses Modell in dieser Unterhaltung.',
+    r5a: 'Sprache: ES · EN · DE · FR', r5b: 'Sprache der Mod (alle Unterhaltungen).',
+    r6b: 'Fixiert Modell und Aufwand.', r7b: 'Zurück zum Modell der App.',
+    foot: 'MIT · Basiert auf Anthropics <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> Unabhängiges Projekt, nicht mit Anthropic verbunden.',
+    alt: { footer: 'Die Auswahlmenüs des Routers neben der Modellauswahl', band: 'Vorschlag mit den Kosten eines Modellwechsels', flow: 'Wann es von selbst wechselt und wann es fragt' },
+    title: 'model-router · das richtige Claude-Modell'
+  },
+  fr: {
+    langLabel: 'Langue', tag: 'Mod pour Claude Code · conseiller pour chat et Cowork',
+    h1: 'Le <em>bon</em> modèle pour chaque conversation.',
+    lead: 'Haiku pour le simple, Sonnet pour le cadré, Opus par défaut, Fable pour l’ambitieux. model-router choisit selon le guide d’Anthropic et ne retraite jamais ton contexte sans te demander.',
+    ctaInstall: 'Installer', ctaGithub: 'Voir sur GitHub', whatH: 'Ce qu’il fait',
+    c1h: 'Deux menus déroulants près du sélecteur de modèle',
+    c1p: 'Le mode de cette conversation (modèle de l’app, Suggérer, Auto ou fixer un modèle) et la langue du mod. Chaque conversation retient le sien ; les nouvelles démarrent désactivées.',
+    c2h: 'Classé par Haiku',
+    c2p: 'Modèle et effort selon le guide d’Anthropic et quatre questions : allers-retours ? erreur coûteuse ? long travail critique ? sinon medium. Les sous-agents génériques passent sur des modèles moins chers.',
+    c3h: 'Skill de conseil de modèle',
+    c3p: 'Te dit en une ligne quel modèle et quel effort choisir, et rédige un passage de relais vers une nouvelle conversation quand changer en cours retraiterait tout. Dans Cowork, un sous-agent lecteur sur Haiku fait la lecture longue.',
+    costH: 'Pas de renvois coûteux',
+    costP: 'Changer de modèle en cours de conversation <strong>retraite tout le contexte</strong>, car le cache appartient à chaque modèle. model-router ne change donc tout seul qu’au <strong>premier message</strong>. Ensuite il suggère, montre combien de tokens ça coûterait et attend que tu appuies sur <em>Changer</em>.',
+    installH: 'Installer', installCodeH: 'Claude Code (terminal)',
+    installCodeP: 'Réponds <code>y</code> à <em>Add marketplace?</em> et choisis la portée <em>user</em>. Depuis un shell : <code>claude plugin install model-router --marketplace LuisPuertollano/claude-model-router</code>',
+    installAppH: 'App de bureau, Chat et Cowork',
+    installAppP: 'Clique sur <strong>+</strong> à côté de la zone de saisie → <strong>Plugins</strong> → <strong>Add marketplace</strong> avec <code>LuisPuertollano/claude-model-router</code> → <strong>Add plugin</strong>. Le Chat et Cowork chargent la skill <em>model-advisor</em> (et dans Cowork le sous-agent <em>haiku-reader</em>) ; les menus déroulants n’existent que dans Claude Code.',
+    prefH: 'Optionnel : rendre le conseiller proactif dans Chat et Cowork',
+    prefP: 'Colle ceci dans Paramètres → Profil → préférences personnelles sur claude.ai :',
+    prefText: 'Au début de chaque nouvelle tâche, utilise la skill model-advisor pour me dire en une ligne quel modèle Claude et quel niveau d’effort conviennent. Si changer en cours de conversation retraitait un long contexte, propose plutôt une nouvelle conversation avec un passage de relais.',
+    useH: 'Utilisation (Claude Code)', thCtl: 'Contrôle', thEff: 'Effet (cette conversation seulement)',
+    r1a: 'Modèle : de l’app', r1b: 'Désactivé : le modèle choisi dans l’app est utilisé.',
+    r2a: 'Modèle : Suggérer', r2b: 'Montre la suggestion ; rien ne change sans Changer.',
+    r3a: 'Modèle : Auto', r3b: 'Choisit au premier message ; ensuite ne suggère que de monter, avec le coût.',
+    r4a: 'Modèle : Fixer Opus…', r4b: 'Fixe ce modèle dans cette conversation.',
+    r5a: 'Langue : ES · EN · DE · FR', r5b: 'Langue du mod (toutes les conversations).',
+    r6b: 'Fixe modèle et effort.', r7b: 'Revient au modèle de l’app.',
+    foot: 'MIT · D’après <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> d’Anthropic. Projet indépendant, sans lien avec Anthropic.',
+    alt: { footer: 'Les menus déroulants du routeur près du sélecteur de modèle', band: 'Suggestion avec le coût d’un changement de modèle', flow: 'Quand il change tout seul et quand il demande' },
+    title: 'model-router · le bon modèle Claude'
+  }
+};
+
+// The English text is the page's own markup: keep it as the fallback dictionary.
+const EN = { alt: { footer: "The router's dropdowns next to the model picker", band: 'A suggestion with the cost of switching model', flow: 'When it switches by itself and when it asks' }, title: document.title };
+document.querySelectorAll('[data-i]').forEach(el => { EN[el.dataset.i] = el.hasAttribute('data-html') ? el.innerHTML : el.textContent; });
+T.en = EN;
+
+function apply(lang) {
+  const t = T[lang] || EN;
+  document.documentElement.lang = lang;
+  document.title = t.title || EN.title;
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const v = t[el.dataset.i] ?? EN[el.dataset.i];
+    if (v === undefined) return;
+    if (el.hasAttribute('data-html')) el.innerHTML = v; else el.textContent = v;
+  });
+  document.querySelectorAll('img[data-img]').forEach(img => {
+    img.src = `img/${lang}/${img.dataset.img}.svg`;
+    img.alt = (t.alt || EN.alt)[img.dataset.img];
+  });
+  document.getElementById('lang').value = lang;
+}
+
+let initial = 'en';
+try { initial = localStorage.getItem('lang') || ''; } catch (e) { initial = ''; }
+if (!T[initial]) initial = (navigator.language || 'en').slice(0, 2).toLowerCase();
+if (!T[initial]) initial = 'en';
+apply(initial);
+
+document.getElementById('lang').addEventListener('change', ev => {
+  apply(ev.target.value);
+  try { localStorage.setItem('lang', ev.target.value); } catch (e) { /* sin almacenamiento: solo esta visita */ }
+});
+</script>
 </body>
 </html>

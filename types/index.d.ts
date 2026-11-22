@@ -1,12 +1,13 @@
 export type Tier = 'haiku' | 'sonnet' | 'opus' | 'fable'
 export type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 export type Mode = 'auto' | 'sugerir' | 'off'
+export type Lang = 'es' | 'en' | 'de' | 'fr'
 
 export type Route = {
   model: Tier
   effort: Effort
   reason: string
-  /** Fijado a mano (/modelo o botón Cambiar): el clasificador ya no lo cambia. */
+  /** Fijado a mano (desplegable, /modelo o «Cambiar»): el clasificador ya no lo cambia. */
   isPinned: boolean
 }
 
@@ -20,6 +21,7 @@ declare module 'claude-code' {
       /** Sugerencia pendiente de confirmar (cambiar ahora reprocesaría el contexto). */
       pending: Route | null
       mode: Mode
+      lang: Lang
       isHidden: boolean
       /** Tokens de contexto de la última petición del hilo principal. */
       ctx: number

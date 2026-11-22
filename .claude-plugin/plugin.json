@@ -1,11 +1,22 @@
 {
   "name": "model-router",
-  "version": "0.2.0",
-  "description": "Elige modelo y esfuerzo por conversación siguiendo la guía de Anthropic, sin reprocesar el contexto a tus espaldas",
-  "author": { "name": "LuisPuertollano" },
+  "version": "0.3.0",
+  "description": "Picks Claude's model and effort per conversation (Claude Code dropdowns, ES/EN/DE/FR) and advises in Chat and Cowork, following Anthropic's guide, without re-processing your context behind your back",
+  "author": {
+    "name": "LuisPuertollano"
+  },
   "homepage": "https://LuisPuertollano.github.io/claude-model-router/",
   "repository": "https://github.com/LuisPuertollano/claude-model-router",
   "license": "MIT",
-  "keywords": ["model", "effort", "router", "cost", "haiku", "sonnet", "opus", "fable"],
+  "keywords": [
+    "model",
+    "effort",
+    "router",
+    "cost",
+    "haiku",
+    "sonnet",
+    "opus",
+    "fable"
+  ],
   "types": "./types/index.d.ts"
 }

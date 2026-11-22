@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="170" viewBox="0 0 880 170" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Ein Vorschlag mit den Kosten eines Modellwechsels mitten in der Unterhaltung</title>
+  <rect width="880" height="170" rx="16" fill="#f6f5f2"/>
+  <rect x="24" y="22" width="832" height="74" rx="12" fill="#eeece7"/>
+  <text x="44" y="52" font-size="15" fill="#5f5c55">Vorschlag: <tspan font-weight="600" fill="#2b2a27">Opus 5.5 · high</tspan> · Fehler ohne bekannte Ursache debuggen</text>
+  <text x="44" y="78" font-size="15" fill="#9c3f1f">Wechsel verarbeitet ~120K Kontext-Tokens neu (≈$0.60)</text>
+  <rect x="586" y="40" width="114" height="36" rx="10" fill="#ffffff" stroke="#cfcbc2"/>
+  <text x="643" y="63" font-size="15" text-anchor="middle" fill="#2b2a27">Wechseln</text>
+  <rect x="712" y="40" width="128" height="36" rx="10" fill="#ffffff" stroke="#cfcbc2"/>
+  <text x="776" y="63" font-size="15" text-anchor="middle" fill="#2b2a27">Beibehalten</text>
+  <rect x="24" y="110" width="832" height="44" rx="12" fill="#ffffff" stroke="#d9d6cf"/>
+  <text x="44" y="138" font-size="15" fill="#8a877f">Nichts ändert sich, bis du „Wechseln“ drückst.</text>
+</svg>

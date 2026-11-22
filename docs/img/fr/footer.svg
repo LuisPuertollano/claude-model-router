@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="210" viewBox="0 0 880 210" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Les menus déroulants du routeur, à côté du sélecteur de modèle</title>
+  <rect width="880" height="210" rx="16" fill="#f6f5f2"/>
+  <rect x="24" y="24" width="832" height="92" rx="14" fill="#ffffff" stroke="#d9d6cf"/>
+  <text x="52" y="62" font-size="17" fill="#8a877f">Décris ta tâche…</text>
+  <circle cx="58" cy="94" r="11" fill="none" stroke="#8a877f" stroke-width="1.6"/>
+  <path d="M53 94h10M58 89v10" stroke="#8a877f" stroke-width="1.6"/>
+  <rect x="250" y="132" width="290" height="36" rx="10" fill="#fbe9df" stroke="#d97757" stroke-width="1.5"/>
+  <text x="264" y="155" font-size="14" fill="#9c3f1f">Modèle:</text>
+  <text x="330" y="155" font-size="14" font-weight="600" fill="#9c3f1f">Auto · Sonnet·medium •</text>
+  <path d="M520 147l6 6 6-6" fill="none" stroke="#9c3f1f" stroke-width="1.6"/>
+  <rect x="552" y="132" width="150" height="36" rx="10" fill="#ffffff" stroke="#cfcbc2"/>
+  <text x="566" y="155" font-size="14" fill="#5f5c55">Langue:</text>
+  <text x="648" y="155" font-size="14" font-weight="600" fill="#2b2a27">FR</text>
+  <path d="M682 147l6 6 6-6" fill="none" stroke="#5f5c55" stroke-width="1.6"/>
+  <text x="718" y="155" font-size="14" fill="#8a877f">Opus 5.5 · High</text>
+  <text x="250" y="192" font-size="13" fill="#8a877f">Mode et modèle de cette conversation · langue du mod</text>
+</svg>

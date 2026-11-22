@@ -1,16 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from 'claude-code/testing'
 
 const usage = { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type On = any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const run = ($: any, args: string): Promise<{ text?: string }> => $.command.run({ command: 'modelo', args })
 
-const engine = (on: On, saved: Record<string, unknown> = {}) => {
+const engine = (on: any, saved: Record<string, unknown> = {}, language?: string) => {
   const store: Record<string, unknown> = { ...saved }
   on('session.id', () => ({ value: 'conv-A' }))
   on('session.messages', () => ({ value: [] }))
+  on('settings.read', () => ({ value: language ? { language } : {} }))
+  on('ui.toast', () => ({ value: undefined }))
   on('store.get', (_: unknown, e: any) => ({ value: store[e.key] }))
   on('store.set', (_: unknown, e: any) => {
     store[e.key] = e.value
@@ -18,8 +18,14 @@ const engine = (on: On, saved: Record<string, unknown> = {}) => {
   })
   on('command.register', () => ({ value: { command: 'modelo' } }))
   on('session.start', (_: unknown, e: any) => ({ cwd: e.cwd }))
+  on('ui.render', ($: any, e: any) => {
+    const { Text } = $.ui.resolve(e)
+    return h(Text, null, 'engine')
+  })
   return store
 }
+
+const FOOTER = { plugin: 'model-router', component: 'SessionMode', props: { modes: [] } } as const
 
 test('una conversación nueva empieza apagada y no toca los subagentes', async ($, on) => {
   engine(on)
@@ -30,9 +36,16 @@ test('una conversación nueva empieza apagada y no toca los subagentes', async (
   })
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   const status = await run($, '')
-  expect(status.text).toContain('modo off')
+  expect(status.text).toContain('mode off')
   await $.tool.call({ tool: 'Agent', description: 'buscar', prompt: 'p', subagent_type: 'Explore' })
   expect(seen).toEqual([undefined])
+})
+
+test('el idioma sale del ajuste language de Claude Code', async ($, on) => {
+  engine(on, {}, 'Spanish')
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const status = await run($, '')
+  expect(status.text).toContain('esta conversación · modo off')
 })
 
 test('el modo se guarda solo para esta conversación', async ($, on) => {
@@ -48,7 +61,7 @@ test('el modo se guarda solo para esta conversación', async ($, on) => {
   await run($, 'auto')
   expect(store['conv:conv-A']).toEqual({
     mode: 'auto',
-    route: { model: 'sonnet', effort: 'high', reason: 'fijado a mano', isPinned: true },
+    route: { model: 'sonnet', effort: 'high', reason: '', isPinned: true },
   })
   expect(store['mode']).toBeUndefined()
 
@@ -60,10 +73,34 @@ test('el modo se guarda solo para esta conversación', async ($, on) => {
 
 test('al volver a una conversación recupera su modo y su modelo', async ($, on) => {
   engine(on, {
+    lang: 'es',
     'conv:conv-A': { mode: 'auto', route: { model: 'opus', effort: 'high', reason: 'x', isPinned: true } },
   })
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   const status = await run($, '')
   expect(status.text).toContain('modo auto')
-  expect(status.text).toContain('Opus 5.5 · high (fijado)')
+  expect(status.text).toContain('Opus 5.5 · high (pin)')
+})
+
+test('los desplegables cambian el modo de la conversación y el idioma', async ($, on) => {
+  const store = engine(on, { lang: 'es' })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+
+  for (const surface of ['desktop', 'terminal'] as const) {
+    const ui = await $.ui.mount({ ...FOOTER, surface })
+    expect((await ui.find({ type: 'Text', text: /engine/ }))?.text).toBe('engine')
+    await ui.unmount()
+  }
+
+  const ui = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
+  await ui.select({ key: 'router-mode', value: 'auto' })
+  expect((store['conv:conv-A'] as any).mode).toBe('auto')
+  await ui.select({ key: 'router-mode', value: 'pin:haiku' })
+  expect((store['conv:conv-A'] as any).route.model).toBe('haiku')
+  await ui.select({ key: 'router-lang', value: 'de' })
+  expect(store['lang']).toBe('de')
+  await ui.unmount()
+
+  const status = await run($, '')
+  expect(status.text).toContain('diese Unterhaltung')
 })
