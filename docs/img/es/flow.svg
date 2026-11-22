@@ -14,7 +14,7 @@
   <rect x="590" y="30" width="260" height="60" rx="12" fill="#e7f0e6" stroke="#5b8a5a"/>
   <text x="720" y="56" font-size="15" font-weight="600" text-anchor="middle" fill="#2f5a2e">Se aplica solo</text>
   <text x="720" y="76" font-size="13" text-anchor="middle" fill="#2f5a2e">modelo + esfuerzo, sin coste extra</text>
-  <path d="M405 110 V170 H590" stroke="#d97757" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M405 110 V170 H590" fill="none" stroke="#d97757" stroke-width="1.6" marker-end="url(#a)"/>
   <text x="420" y="160" font-size="13" fill="#9c3f1f">no</text>
   <rect x="590" y="140" width="260" height="80" rx="12" fill="#fbe9df" stroke="#d97757"/>
   <text x="720" y="166" font-size="15" font-weight="600" text-anchor="middle" fill="#9c3f1f">Solo sugiere</text>
