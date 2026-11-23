@@ -54,6 +54,11 @@
         overflow-x: auto; font-size: 14.5px; margin: 8px 0 16px; white-space: pre-wrap; }
   .rule { background: var(--ok-soft); border: 1px solid var(--ok); border-radius: 16px; padding: 22px; }
   .rule strong { color: var(--ok); }
+  .tree { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 8px 0 16px;
+          overflow-x: auto; text-align: center; min-height: 80px; }
+  .tree svg { max-width: 100%; height: auto; }
+  .tree .node polygon { fill: var(--accent-soft) !important; stroke: var(--accent) !important; }
+  .tree-grid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
   footer { padding: 40px 0 60px; color: var(--muted); font-size: 14px; }
   a { color: var(--accent); }
   @media (max-width: 520px) { table { font-size: 14px; } th, td { padding: 10px; } }
@@ -101,6 +106,21 @@
     <img class="shot" data-img="flow" src="img/en/flow.svg" alt="">
   </section>
 
+  <section id="tree">
+    <h2 data-i="treeH">How it decides</h2>
+    <p data-i="treeP" data-html>Everything applies to one conversation. The same diagrams, with more detail, are in <a href="https://github.com/LuisPuertollano/claude-model-router/blob/main/DECISION-TREE.md">DECISION-TREE.md</a>.</p>
+    <h3 data-i="t1">1 · Does the router act?</h3><div class="tree" data-tree="0"></div>
+    <div class="tree-grid">
+      <div><h3 data-i="t2">2 · Which model</h3><div class="tree" data-tree="1"></div></div>
+      <div><h3 data-i="t3">3 · Which effort (first yes wins; never max)</h3><div class="tree" data-tree="2"></div></div>
+    </div>
+    <h3 data-i="t4">4 · Does your account have that model?</h3><div class="tree" data-tree="3"></div>
+    <div class="tree-grid">
+      <div><h3 data-i="t5">5 · When the proposal is applied</h3><div class="tree" data-tree="4"></div></div>
+      <div><h3 data-i="t6">6 · Subagents (Auto only)</h3><div class="tree" data-tree="5"></div></div>
+    </div>
+  </section>
+
   <section id="install">
     <h2 data-i="installH">Install</h2>
     <h3 data-i="installCodeH">Claude Code (terminal)</h3>
@@ -122,8 +142,11 @@
       <tr><td data-i="r3a">Model: Auto</td><td data-i="r3b">Picks on the first message; afterwards only suggests upgrades, with their cost.</td></tr>
       <tr><td data-i="r4a">Model: Pin Opus…</td><td data-i="r4b">Pins that model in this conversation.</td></tr>
       <tr><td data-i="r5a">Language: ES · EN · DE · FR</td><td data-i="r5b">Language of the mod (all conversations).</td></tr>
+      <tr><td data-i="r8a">Effort: low … max</td><td data-i="r8b">With a model chosen, changes only the effort. With none, pins nothing: the effort applies to the app's model.</td></tr>
+      <tr><td data-i="r9a">Palette: six swatches</td><td data-i="r9b">Colours of the menu only, from light to dark (all conversations).</td></tr>
       <tr><td><code>/modelo opus high</code></td><td data-i="r6b">Pins model and effort.</td></tr>
-      <tr><td><code>/modelo libre</code></td><td data-i="r7b">Back to the app's model.</td></tr>
+      <tr><td><code>/modelo high</code></td><td data-i="r10b">Effort only, same as the menu.</td></tr>
+      <tr><td><code>/modelo libre</code></td><td data-i="r7b">Back to the app's model and effort.</td></tr>
     </table>
   </section>
 
@@ -158,9 +181,23 @@ const T = {
     r3a: 'Modelo: Auto', r3b: 'Elige en el primer mensaje; después solo sugiere subir, con su coste.',
     r4a: 'Modelo: Fijar Opus…', r4b: 'Fija ese modelo en esta conversación.',
     r5a: 'Idioma: ES · EN · DE · FR', r5b: 'Idioma de la mod (todas las conversaciones).',
-    r6b: 'Fija modelo y esfuerzo.', r7b: 'Vuelve al modelo de la app.',
+    r6b: 'Fija modelo y esfuerzo.', r7bOld: '',
     foot: 'MIT · Basado en <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> de Anthropic. Proyecto independiente, sin relación oficial con Anthropic.',
     alt: { footer: 'El botón del enrutador y su menú, junto al selector de modelo', band: 'Sugerencia con el coste de cambiar de modelo', flow: 'Cuándo cambia solo y cuándo pregunta' },
+    treeH: "Cómo decide",
+    treeP: "Todo vale para una conversación. Los mismos diagramas, con más detalle, están en <a href=\"https://github.com/LuisPuertollano/claude-model-router/blob/main/DECISION-TREE.md#español\">DECISION-TREE.md</a>.",
+    t1: "1 · ¿Actúa el enrutador?",
+    t2: "2 · Qué modelo",
+    t3: "3 · Qué esfuerzo (gana el primer sí; nunca max)",
+    t4: "4 · ¿Tiene tu cuenta ese modelo?",
+    t5: "5 · Cuándo se aplica la propuesta",
+    t6: "6 · Subagentes (solo Auto)",
+    r8a: "Esfuerzo: low … max",
+    r8b: "Con un modelo elegido, cambia solo el esfuerzo. Sin ninguno, no fija nada: el esfuerzo se aplica al modelo de la app.",
+    r9a: "Paleta: seis rectángulos",
+    r9b: "Solo los colores del menú, de más clara a más oscura (todas las conversaciones).",
+    r10b: "Solo el esfuerzo, igual que el menú.",
+    r7b: "Vuelve al modelo y al esfuerzo de la app.",
     title: 'model-router · el modelo justo de Claude'
   },
   de: {
@@ -189,9 +226,23 @@ const T = {
     r3a: 'Modell: Auto', r3b: 'Wählt bei der ersten Nachricht; danach nur Vorschläge nach oben, mit Kosten.',
     r4a: 'Modell: Opus fixieren…', r4b: 'Fixiert dieses Modell in dieser Unterhaltung.',
     r5a: 'Sprache: ES · EN · DE · FR', r5b: 'Sprache der Mod (alle Unterhaltungen).',
-    r6b: 'Fixiert Modell und Aufwand.', r7b: 'Zurück zum Modell der App.',
+    r6b: 'Fixiert Modell und Aufwand.', r7bOld: '',
     foot: 'MIT · Basiert auf Anthropics <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> Unabhängiges Projekt, nicht mit Anthropic verbunden.',
     alt: { footer: 'Knopf und Menü des Routers neben der Modellauswahl', band: 'Vorschlag mit den Kosten eines Modellwechsels', flow: 'Wann es von selbst wechselt und wann es fragt' },
+    treeH: "Wie es entscheidet",
+    treeP: "Alles gilt für eine Unterhaltung. Dieselben Diagramme, ausführlicher, stehen in <a href=\"https://github.com/LuisPuertollano/claude-model-router/blob/main/DECISION-TREE.md#deutsch\">DECISION-TREE.md</a>.",
+    t1: "1 · Greift der Router ein?",
+    t2: "2 · Welches Modell",
+    t3: "3 · Welcher Aufwand (das erste Ja gilt; nie max)",
+    t4: "4 · Hat dein Konto dieses Modell?",
+    t5: "5 · Wann der Vorschlag gilt",
+    t6: "6 · Subagenten (nur Auto)",
+    r8a: "Aufwand: low … max",
+    r8b: "Mit gewähltem Modell ändert er nur den Aufwand. Ohne Modell fixiert er nichts: der Aufwand gilt für das Modell der App.",
+    r9a: "Palette: sechs Farbfelder",
+    r9b: "Nur die Farben des Menüs, von hell nach dunkel (alle Unterhaltungen).",
+    r10b: "Nur der Aufwand, wie im Menü.",
+    r7b: "Zurück zu Modell und Aufwand der App.",
     title: 'model-router · das richtige Claude-Modell'
   },
   fr: {
@@ -220,9 +271,23 @@ const T = {
     r3a: 'Modèle : Auto', r3b: 'Choisit au premier message ; ensuite ne suggère que de monter, avec le coût.',
     r4a: 'Modèle : Fixer Opus…', r4b: 'Fixe ce modèle dans cette conversation.',
     r5a: 'Langue : ES · EN · DE · FR', r5b: 'Langue du mod (toutes les conversations).',
-    r6b: 'Fixe modèle et effort.', r7b: 'Revient au modèle de l’app.',
+    r6b: 'Fixe modèle et effort.', r7bOld: '',
     foot: 'MIT · D’après <a href="https://claude.dev/blog/which-claude-model-should-you-build-with/">Which Claude model should you build with?</a> d’Anthropic. Projet indépendant, sans lien avec Anthropic.',
     alt: { footer: 'Le bouton du routeur et son menu, près du sélecteur de modèle', band: 'Suggestion avec le coût d’un changement de modèle', flow: 'Quand il change tout seul et quand il demande' },
+    treeH: "Comment il décide",
+    treeP: "Tout vaut pour une conversation. Les mêmes diagrammes, plus détaillés, sont dans <a href=\"https://github.com/LuisPuertollano/claude-model-router/blob/main/DECISION-TREE.md#français\">DECISION-TREE.md</a>.",
+    t1: "1 · Le routeur agit-il ?",
+    t2: "2 · Quel modèle",
+    t3: "3 · Quel effort (le premier oui gagne ; jamais max)",
+    t4: "4 · Ton compte a-t-il ce modèle ?",
+    t5: "5 · Quand la proposition s’applique",
+    t6: "6 · Sous-agents (Auto seulement)",
+    r8a: "Effort : low … max",
+    r8b: "Avec un modèle choisi, ne change que l’effort. Sans modèle, ne fixe rien : l’effort s’applique au modèle de l’app.",
+    r9a: "Palette : six pastilles",
+    r9b: "Seulement les couleurs du menu, du clair au foncé (toutes les conversations).",
+    r10b: "L’effort seul, comme dans le menu.",
+    r7b: "Revient au modèle et à l’effort de l’app.",
     title: 'model-router · le bon modèle Claude'
   }
 };
@@ -246,6 +311,7 @@ function apply(lang) {
     img.alt = (t.alt || EN.alt)[img.dataset.img];
   });
   document.getElementById('lang').value = lang;
+  document.dispatchEvent(new CustomEvent('langchange', { detail: lang }));
 }
 
 let initial = 'en';
@@ -258,6 +324,25 @@ document.getElementById('lang').addEventListener('change', ev => {
   apply(ev.target.value);
   try { localStorage.setItem('lang', ev.target.value); } catch (e) { /* sin almacenamiento: solo esta visita */ }
 });
+</script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+const TREES = {"en": ["flowchart TD\n  A[\"You send a message\"] --> B{{\"Mode\"}}\n  B -->|\"App's model\"| Z[\"The app's model answers<br/>(an effort you chose still applies)\"]\n  B -->|\"Suggest / Auto\"| C{{\"Model pinned by you?\"}}\n  C -->|yes| P[\"Pinned model and effort\"]\n  C -->|no| D{{\"Command, system message,<br/>or under 25 characters with a route?\"}}\n  D -->|yes| K[\"Keep the current route\"]\n  D -->|no| E[\"Haiku classifies it<br/>low effort, 8 s at most\"]\n  E --> F{{\"Just a continuation?<br/>yes / go on / ok\"}}\n  F -->|yes| K\n  F -->|no| G[\"Proposal: model + effort\"]", "flowchart TD\n  S[\"Message\"] --> H{{\"Simple, repetitive,<br/>easy to check?\"}}\n  H -->|yes| HA[\"Haiku\"]\n  H -->|no| SO{{\"Scoped: the result<br/>fits in one sentence?\"}}\n  SO -->|yes| SN[\"Sonnet\"]\n  SO -->|no| FB{{\"Ambitious, open-ended,<br/>mistakes costly?\"}}\n  FB -->|yes| FA[\"Fable\"]\n  FB -->|no| OP[\"Opus (default, and when unsure)\"]", "flowchart TD\n  A{{\"Back-and-forth with you,<br/>or a simple task?\"}} -->|yes| L[\"low\"]\n  A -->|no| B{{\"Would a hidden mistake cost<br/>money, a client or a bad decision?\"}}\n  B -->|yes| HI[\"high\"]\n  B -->|no| C{{\"Long, hard, critical job<br/>left to run alone?\"}}\n  C -->|yes| X[\"xhigh\"]\n  C -->|no| M[\"medium\"]", "flowchart TD\n  W[\"Model wanted\"] --> Q{{\"Checked recently?\"}}\n  Q -->|yes| R[\"Use the remembered answer\"]\n  Q -->|no| T[\"One tiny request to that model\"]\n  T --> U{{\"Model not found, invalid,<br/>auth or billing error?\"}}\n  U -->|yes| N[\"Not available<br/>remembered 1 day\"]\n  U -->|no| Y[\"Available<br/>remembered 7 days\"]\n  N --> D[\"Next model down, with a notice<br/>Fable → Opus → Sonnet → Haiku\"]", "flowchart TD\n  G[\"Proposal\"] --> A{{\"Any answer yet in this conversation?\"}}\n  A -->|no| M{{\"Mode\"}}\n  M -->|Auto| AP[\"Applied at once\"]\n  M -->|\"Suggest\"| BA[\"Band: Switch / Keep\"]\n  A -->|yes| U{{\"Proposed model higher<br/>than the current one?\"}}\n  U -->|yes| BC[\"Band: Switch / Keep<br/>with the cost to re-process\"]\n  U -->|no| K[\"Nothing: moving down never pays\"]", "flowchart TD\n  A[\"Subagent without its own model\"] --> B{{\"Type\"}}\n  B -->|Explore| H[\"Haiku\"]\n  B -->|\"general-purpose, Plan\"| C[\"Haiku picks Haiku, Sonnet or Opus\"]\n  C --> D[\"Never above the conversation's model,<br/>never Fable, only models the account has\"]"], "es": ["flowchart TD\n  A[\"Envías un mensaje\"] --> B{{\"Modo\"}}\n  B -->|\"Modelo de la app\"| Z[\"Responde el modelo de la app<br/>(con el esfuerzo que hayas elegido)\"]\n  B -->|\"Sugerir / Auto\"| C{{\"¿Has fijado modelo?\"}}\n  C -->|sí| P[\"Modelo y esfuerzo fijados\"]\n  C -->|no| D{{\"¿Comando, mensaje del sistema<br/>o menos de 25 caracteres con ruta?\"}}\n  D -->|sí| K[\"Sigue la ruta actual\"]\n  D -->|no| E[\"Haiku lo clasifica<br/>esfuerzo low, 8 s como mucho\"]\n  E --> F{{\"¿Solo una continuación?<br/>sí / sigue / vale\"}}\n  F -->|sí| K\n  F -->|no| G[\"Propuesta: modelo + esfuerzo\"]", "flowchart TD\n  S[\"Mensaje\"] --> H{{\"¿Simple, repetitivo,<br/>fácil de comprobar?\"}}\n  H -->|sí| HA[\"Haiku\"]\n  H -->|no| SO{{\"Acotado: ¿el resultado<br/>cabe en una frase?\"}}\n  SO -->|sí| SN[\"Sonnet\"]\n  SO -->|no| FB{{\"¿Ambicioso, abierto,<br/>caro si falla?\"}}\n  FB -->|sí| FA[\"Fable\"]\n  FB -->|no| OP[\"Opus (por defecto y si hay duda)\"]", "flowchart TD\n  A{{\"¿Ida y vuelta contigo<br/>o tarea simple?\"}} -->|sí| L[\"low\"]\n  A -->|no| B{{\"¿Un error escondido costaría<br/>dinero, un cliente o una mala decisión?\"}}\n  B -->|sí| HI[\"high\"]\n  B -->|no| C{{\"¿Trabajo largo, difícil y crítico<br/>que va solo?\"}}\n  C -->|sí| X[\"xhigh\"]\n  C -->|no| M[\"medium\"]", "flowchart TD\n  W[\"Modelo pedido\"] --> Q{{\"¿Comprobado hace poco?\"}}\n  Q -->|sí| R[\"Usa lo recordado\"]\n  Q -->|no| T[\"Una petición mínima a ese modelo\"]\n  T --> U{{\"¿Modelo no encontrado, inválido,<br/>error de acceso o de pago?\"}}\n  U -->|sí| N[\"No disponible<br/>se recuerda 1 día\"]\n  U -->|no| Y[\"Disponible<br/>se recuerda 7 días\"]\n  N --> D[\"El siguiente hacia abajo, con aviso<br/>Fable → Opus → Sonnet → Haiku\"]", "flowchart TD\n  G[\"Propuesta\"] --> A{{\"¿Ya hay respuestas en esta conversación?\"}}\n  A -->|no| M{{\"Modo\"}}\n  M -->|Auto| AP[\"Se aplica al momento\"]\n  M -->|\"Sugerir\"| BA[\"Banda: Cambiar / Seguir igual\"]\n  A -->|sí| U{{\"¿El modelo propuesto es<br/>mayor que el actual?\"}}\n  U -->|sí| BC[\"Banda: Cambiar / Seguir igual<br/>con el coste de reprocesar\"]\n  U -->|no| K[\"Nada: bajar nunca compensa\"]", "flowchart TD\n  A[\"Subagente sin modelo propio\"] --> B{{\"Tipo\"}}\n  B -->|Explore| H[\"Haiku\"]\n  B -->|\"general-purpose, Plan\"| C[\"Haiku elige Haiku, Sonnet u Opus\"]\n  C --> D[\"Nunca por encima del de la conversación,<br/>nunca Fable, solo modelos de tu cuenta\"]"], "de": ["flowchart TD\n  A[\"Du sendest eine Nachricht\"] --> B{{\"Modus\"}}\n  B -->|\"Modell der App\"| Z[\"Das Modell der App antwortet<br/>(mit deinem gewählten Aufwand)\"]\n  B -->|\"Vorschlagen / Auto\"| C{{\"Modell von dir fixiert?\"}}\n  C -->|ja| P[\"Fixiertes Modell und Aufwand\"]\n  C -->|nein| D{{\"Befehl, Systemnachricht<br/>oder unter 25 Zeichen mit Route?\"}}\n  D -->|ja| K[\"Aktuelle Route bleibt\"]\n  D -->|nein| E[\"Haiku stuft sie ein<br/>Aufwand low, höchstens 8 s\"]\n  E --> F{{\"Nur eine Fortsetzung?<br/>ja / weiter / ok\"}}\n  F -->|ja| K\n  F -->|nein| G[\"Vorschlag: Modell + Aufwand\"]", "flowchart TD\n  S[\"Nachricht\"] --> H{{\"Einfach, wiederholend,<br/>leicht prüfbar?\"}}\n  H -->|ja| HA[\"Haiku\"]\n  H -->|nein| SO{{\"Eng umrissen: Ergebnis<br/>in einem Satz?\"}}\n  SO -->|ja| SN[\"Sonnet\"]\n  SO -->|nein| FB{{\"Ehrgeizig, offen,<br/>Fehler teuer?\"}}\n  FB -->|ja| FA[\"Fable\"]\n  FB -->|nein| OP[\"Opus (Standard und im Zweifel)\"]", "flowchart TD\n  A{{\"Hin und Her mit dir<br/>oder einfache Aufgabe?\"}} -->|ja| L[\"low\"]\n  A -->|nein| B{{\"Würde ein versteckter Fehler Geld,<br/>einen Kunden oder eine Fehlentscheidung kosten?\"}}\n  B -->|ja| HI[\"high\"]\n  B -->|nein| C{{\"Lange, schwere, kritische Arbeit<br/>allein?\"}}\n  C -->|ja| X[\"xhigh\"]\n  C -->|nein| M[\"medium\"]", "flowchart TD\n  W[\"Gewünschtes Modell\"] --> Q{{\"Kürzlich geprüft?\"}}\n  Q -->|ja| R[\"Gemerkte Antwort nutzen\"]\n  Q -->|nein| T[\"Eine Mini-Anfrage an das Modell\"]\n  T --> U{{\"Modell nicht gefunden, ungültig,<br/>Zugangs- oder Zahlungsfehler?\"}}\n  U -->|ja| N[\"Nicht verfügbar<br/>1 Tag gemerkt\"]\n  U -->|nein| Y[\"Verfügbar<br/>7 Tage gemerkt\"]\n  N --> D[\"Nächstes Modell darunter, mit Hinweis<br/>Fable → Opus → Sonnet → Haiku\"]", "flowchart TD\n  G[\"Vorschlag\"] --> A{{\"Schon Antworten in dieser Unterhaltung?\"}}\n  A -->|nein| M{{\"Modus\"}}\n  M -->|Auto| AP[\"Sofort angewandt\"]\n  M -->|\"Vorschlagen\"| BA[\"Leiste: Wechseln / Beibehalten\"]\n  A -->|ja| U{{\"Vorgeschlagenes Modell<br/>höher als das aktuelle?\"}}\n  U -->|ja| BC[\"Leiste: Wechseln / Beibehalten<br/>mit den Kosten der Neuverarbeitung\"]\n  U -->|nein| K[\"Nichts: nach unten lohnt nie\"]", "flowchart TD\n  A[\"Subagent ohne eigenes Modell\"] --> B{{\"Typ\"}}\n  B -->|Explore| H[\"Haiku\"]\n  B -->|\"general-purpose, Plan\"| C[\"Haiku wählt Haiku, Sonnet oder Opus\"]\n  C --> D[\"Nie über dem Modell der Unterhaltung,<br/>nie Fable, nur Modelle deines Kontos\"]"], "fr": ["flowchart TD\n  A[\"Tu envoies un message\"] --> B{{\"Mode\"}}\n  B -->|\"Modèle de l’app\"| Z[\"Le modèle de l’app répond<br/>(avec l’effort que tu as choisi)\"]\n  B -->|\"Suggérer / Auto\"| C{{\"Modèle fixé par toi ?\"}}\n  C -->|oui| P[\"Modèle et effort fixés\"]\n  C -->|non| D{{\"Commande, message système<br/>ou moins de 25 caractères avec route ?\"}}\n  D -->|oui| K[\"La route actuelle reste\"]\n  D -->|non| E[\"Haiku le classe<br/>effort low, 8 s au plus\"]\n  E --> F{{\"Simple suite ?<br/>oui / vas-y / ok\"}}\n  F -->|oui| K\n  F -->|non| G[\"Proposition : modèle + effort\"]", "flowchart TD\n  S[\"Message\"] --> H{{\"Simple, répétitif,<br/>facile à vérifier ?\"}}\n  H -->|oui| HA[\"Haiku\"]\n  H -->|non| SO{{\"Cadré : le résultat<br/>tient en une phrase ?\"}}\n  SO -->|oui| SN[\"Sonnet\"]\n  SO -->|non| FB{{\"Ambitieux, ouvert,<br/>erreur coûteuse ?\"}}\n  FB -->|oui| FA[\"Fable\"]\n  FB -->|non| OP[\"Opus (par défaut et en cas de doute)\"]", "flowchart TD\n  A{{\"Allers-retours avec toi<br/>ou tâche simple ?\"}} -->|oui| L[\"low\"]\n  A -->|non| B{{\"Une erreur cachée coûterait-elle<br/>de l’argent, un client ou une mauvaise décision ?\"}}\n  B -->|oui| HI[\"high\"]\n  B -->|non| C{{\"Long travail difficile et critique<br/>en autonomie ?\"}}\n  C -->|oui| X[\"xhigh\"]\n  C -->|non| M[\"medium\"]", "flowchart TD\n  W[\"Modèle voulu\"] --> Q{{\"Vérifié récemment ?\"}}\n  Q -->|oui| R[\"Réponse retenue\"]\n  Q -->|non| T[\"Une requête minimale à ce modèle\"]\n  T --> U{{\"Modèle introuvable, invalide,<br/>erreur d’accès ou de paiement ?\"}}\n  U -->|oui| N[\"Indisponible<br/>retenu 1 jour\"]\n  U -->|non| Y[\"Disponible<br/>retenu 7 jours\"]\n  N --> D[\"Le suivant en dessous, avec un avis<br/>Fable → Opus → Sonnet → Haiku\"]", "flowchart TD\n  G[\"Proposition\"] --> A{{\"Déjà des réponses dans cette conversation ?\"}}\n  A -->|non| M{{\"Mode\"}}\n  M -->|Auto| AP[\"Appliquée tout de suite\"]\n  M -->|\"Suggérer\"| BA[\"Bandeau : Changer / Garder\"]\n  A -->|oui| U{{\"Modèle proposé<br/>plus haut que l’actuel ?\"}}\n  U -->|oui| BC[\"Bandeau : Changer / Garder<br/>avec le coût du retraitement\"]\n  U -->|non| K[\"Rien : descendre ne vaut jamais\"]", "flowchart TD\n  A[\"Sous-agent sans modèle propre\"] --> B{{\"Type\"}}\n  B -->|Explore| H[\"Haiku\"]\n  B -->|\"general-purpose, Plan\"| C[\"Haiku choisit Haiku, Sonnet ou Opus\"]\n  C --> D[\"Jamais au-dessus du modèle de la conversation,<br/>jamais Fable, seulement les modèles du compte\"]"]};
+const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict',
+                     flowchart: { htmlLabels: true, curve: 'basis', nodeSpacing: 30, rankSpacing: 36 }, fontFamily: 'Segoe UI, Helvetica, Arial, sans-serif' });
+let n = 0;
+async function draw(lang) {
+  const list = TREES[lang] || TREES.en;
+  for (const el of document.querySelectorAll('[data-tree]')) {
+    try {
+      const { svg } = await mermaid.render(`tree-${n++}`, list[+el.dataset.tree]);
+      el.innerHTML = svg;
+    } catch (e) { el.textContent = ''; }
+  }
+}
+draw(document.documentElement.lang);
+document.addEventListener('langchange', ev => draw(ev.detail));
 </script>
 </body>
 </html>
