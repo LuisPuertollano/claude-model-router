@@ -23,6 +23,8 @@ declare module 'claude-code' {
       mode: Mode
       lang: Lang
       isHidden: boolean
+      /** Menú de opciones abierto encima del cuadro de texto. */
+      isMenuOpen: boolean
       /** Tokens de contexto de la última petición del hilo principal. */
       ctx: number
       /** Modelo que respondió la última petición del hilo principal. */

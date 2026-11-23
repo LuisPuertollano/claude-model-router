@@ -26,6 +26,11 @@ const engine = (on: any, saved: Record<string, unknown> = {}, language?: string)
 }
 
 const FOOTER = { plugin: 'model-router', component: 'SessionMode', props: { modes: [] } } as const
+const MENU = {
+  plugin: 'model-router',
+  component: 'AbovePrompt',
+  props: { hasSurvey: false, isCollapsed: false, isWorking: false, maxRows: 20 },
+} as const
 
 test('una conversación nueva empieza apagada y no toca los subagentes', async ($, on) => {
   engine(on)
@@ -82,7 +87,7 @@ test('al volver a una conversación recupera su modo y su modelo', async ($, on)
   expect(status.text).toContain('Opus 5.5 · high (pin)')
 })
 
-test('los desplegables cambian el modo de la conversación y el idioma', async ($, on) => {
+test('el botón del pie y su menú cambian el modo de la conversación y el idioma', async ($, on) => {
   const store = engine(on, { lang: 'es' })
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
 
@@ -92,14 +97,23 @@ test('los desplegables cambian el modo de la conversación y el idioma', async (
     await ui.unmount()
   }
 
-  const ui = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
-  await ui.select({ key: 'router-mode', value: 'auto' })
+  const foot = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
+  await foot.press({ key: 'router-menu' })
+  const menu = await $.ui.mount({ ...MENU, surface: 'desktop' } as any)
+  await menu.press({ key: 'router-auto' })
   expect((store['conv:conv-A'] as any).mode).toBe('auto')
-  await ui.select({ key: 'router-mode', value: 'pin:haiku' })
+  await foot.press({ key: 'router-menu' })
+  await menu.press({ key: 'router-pin:haiku' })
   expect((store['conv:conv-A'] as any).route.model).toBe('haiku')
-  await ui.select({ key: 'router-lang', value: 'de' })
+  await foot.press({ key: 'router-menu' })
+  await menu.press({ key: 'router-lang-de' })
   expect(store['lang']).toBe('de')
-  await ui.unmount()
+  await menu.unmount()
+  await foot.unmount()
+
+  // «/modelo [sugerir]», copiado tal cual de la pista, también vale
+  await run($, '[sugerir]')
+  expect((store['conv:conv-A'] as any).mode).toBe('sugerir')
 
   const status = await run($, '')
   expect(status.text).toContain('diese Unterhaltung')

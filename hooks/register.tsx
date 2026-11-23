@@ -19,6 +19,7 @@ const pendingAtom = atom({ plugin: 'model-router', key: 'pending' } as const, nu
 const modeAtom = atom({ plugin: 'model-router', key: 'mode' } as const, 'off')
 const langAtom = atom({ plugin: 'model-router', key: 'lang' } as const, 'en')
 const hiddenAtom = atom({ plugin: 'model-router', key: 'isHidden' } as const, false)
+const menuAtom = atom({ plugin: 'model-router', key: 'isMenuOpen' } as const, false)
 const ctxAtom = atom({ plugin: 'model-router', key: 'ctx' } as const, 0)
 const lastModelAtom = atom({ plugin: 'model-router', key: 'lastModel' } as const, null)
 
@@ -175,7 +176,8 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'modelo' }, async ($, e) => {
-    const [first = '', second = ''] = e.args.trim().toLowerCase().split(/\s+/)
+    // Admite lo que la pista sugiere tal cual: «[auto]», «<es>», «auto|sugerir».
+    const [first = '', second = ''] = e.args.toLowerCase().replace(/[\[\]<>|,]/g, ' ').trim().split(/\s+/)
     const text = (s: string) => ({ text: s, isTextDisplayOnly: true as const })
 
     if (['idioma', 'lang', 'language', 'sprache', 'langue'].includes(first)) {
@@ -291,30 +293,56 @@ export const register: Register = on => {
     return next({ ...e, model: model as 'haiku' | 'sonnet' | 'opus' })
   }).catch(($, e, next) => next(e))
 
-  // --- 4. Desplegables en el pie del cuadro de texto, junto al selector de la app ---
+  // --- 4. Botón en el pie, junto al selector de la app: abre el menú de opciones ---
+  // (la app de escritorio dibuja botones en el pie, pero no desplegables)
   on('ui.render', { component: 'SessionMode' }, async ($, e, next) => {
     const s = await t($)
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
     const pending = await read($, pendingAtom)
-    const lang = await read($, langAtom)
-    const { Box, Select } = $.ui.resolve(e)
-
+    const isOpen = await read($, menuAtom)
+    const { Box, Button } = $.ui.resolve(e)
     const pick = route ? ` · ${SHORT[route.model]}·${route.effort}` : ''
+    const now =
+      route?.isPinned && mode !== 'off'
+        ? `${s.pin(SHORT[route.model])} · ${route.effort}`
+        : mode === 'auto'
+          ? `${s.mode.auto}${pick}`
+          : s.mode[mode]
     const dot = pending && mode !== 'off' ? ' •' : ''
+    const engine = await next(e)
+    return (
+      <Box>
+        <Button
+          key="router-menu"
+          plain
+          label={`${s.modelLabel}: ${now}${dot} ${isOpen ? '▴' : '▾'}`}
+          onPress={() => update($, menuAtom, v => !v)}
+        />
+        {engine}
+      </Box>
+    )
+  })
+
+  // --- 4b. El menú: una fila de modos, otra de idiomas; la opción actual resaltada ---
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    if (e.props.hasSurvey || !(await read($, menuAtom))) return next(e)
+    const s = await t($)
+    const mode = await read($, modeAtom)
+    const route = await read($, routeAtom)
+    const lang = await read($, langAtom)
+    const { Box, Button, Text } = $.ui.resolve(e)
     const value = route?.isPinned && mode !== 'off' ? `pin:${route.model}` : mode
     const options = [
       { value: 'off', label: s.mode.off },
-      { value: 'sugerir', label: `${s.mode.sugerir}${mode === 'sugerir' && !route?.isPinned ? dot : ''}` },
-      { value: 'auto', label: `${s.mode.auto}${mode === 'auto' && !route?.isPinned ? `${pick}${dot}` : ''}` },
-      ...TIERS.map(tier => ({
-        value: `pin:${tier}`,
-        label: `${s.pin(SHORT[tier])}${value === `pin:${tier}` ? ` · ${route?.effort ?? 'medium'}${dot}` : ''}`,
-      })),
+      { value: 'sugerir', label: s.mode.sugerir },
+      { value: 'auto', label: s.mode.auto },
+      ...TIERS.map(tier => ({ value: `pin:${tier}`, label: s.pin(SHORT[tier]) })),
     ]
-
+    const close = () => update($, menuAtom, () => false)
     const onModel = async (v: string) => {
       const str = await t($)
+      await close()
       if (v.startsWith('pin:')) {
         const tier = v.slice(4) as Tier
         const effort = (await read($, routeAtom))?.effort ?? 'medium'
@@ -329,23 +357,35 @@ export const register: Register = on => {
       await setMode($, m)
       $.ui.toast(str.toast[m])
     }
-    const onLang = async (v: string) => {
-      await setLang($, v as Lang)
-      $.ui.toast(STRINGS[v as Lang].toastLang)
+    const onLang = async (v: Lang) => {
+      await setLang($, v)
+      $.ui.toast(STRINGS[v].toastLang)
     }
-
-    const engine = await next(e)
     return (
-      <Box>
-        <Select key="router-mode" label={`${s.modelLabel}:`} value={value} options={options} onSelect={onModel} />
-        <Select
-          key="router-lang"
-          label={`${s.langLabel}:`}
-          value={lang}
-          options={LANGS.map(l => ({ value: l, label: l.toUpperCase() }))}
-          onSelect={onLang}
-        />
-        {engine}
+      <Box flexDirection="column">
+        <Box>
+          <Text dimColor>{s.modelLabel}: </Text>
+          {options.map(o => (
+            <Button
+              key={`router-${o.value}`}
+              label={o.value === value ? `✓ ${o.label}` : o.label}
+              variant={o.value === value ? 'primary' : 'secondary'}
+              onPress={() => onModel(o.value)}
+            />
+          ))}
+        </Box>
+        <Box>
+          <Text dimColor>{s.langLabel}: </Text>
+          {LANGS.map(l => (
+            <Button
+              key={`router-lang-${l}`}
+              label={l === lang ? `✓ ${l.toUpperCase()}` : l.toUpperCase()}
+              variant={l === lang ? 'primary' : 'secondary'}
+              onPress={() => onLang(l)}
+            />
+          ))}
+          <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+        </Box>
       </Box>
     )
   })
