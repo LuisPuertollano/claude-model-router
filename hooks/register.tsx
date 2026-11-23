@@ -433,10 +433,11 @@ export const register: Register = on => {
                 <Box
                   key={`router-palette-${p}-chip`}
                   width={SWATCH}
-                  height={1}
                   overflow="hidden"
                   justifyContent="center"
                   backgroundColor={DOT[p]}
+                  borderStyle="single"
+                  borderColor={C?.dim ?? '#77746c'}
                 >
                   <Button key={`router-palette-${p}`} plain label={palette === p ? '✓' : ' '} onPress={() => onPalette(p)} />
                 </Box>
