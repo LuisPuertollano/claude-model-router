@@ -1,18 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="210" viewBox="0 0 880 210" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
-  <title>Les menus déroulants du routeur, à côté du sélecteur de modèle</title>
-  <rect width="880" height="210" rx="16" fill="#f6f5f2"/>
-  <rect x="24" y="24" width="832" height="92" rx="14" fill="#ffffff" stroke="#d9d6cf"/>
-  <text x="52" y="62" font-size="17" fill="#8a877f">Décris ta tâche…</text>
-  <circle cx="58" cy="94" r="11" fill="none" stroke="#8a877f" stroke-width="1.6"/>
-  <path d="M53 94h10M58 89v10" stroke="#8a877f" stroke-width="1.6"/>
-  <rect x="250" y="132" width="290" height="36" rx="10" fill="#fbe9df" stroke="#d97757" stroke-width="1.5"/>
-  <text x="264" y="155" font-size="14" fill="#9c3f1f">Modèle:</text>
-  <text x="330" y="155" font-size="14" font-weight="600" fill="#9c3f1f">Auto · Sonnet·medium •</text>
-  <path d="M520 147l6 6 6-6" fill="none" stroke="#9c3f1f" stroke-width="1.6"/>
-  <rect x="552" y="132" width="150" height="36" rx="10" fill="#ffffff" stroke="#cfcbc2"/>
-  <text x="566" y="155" font-size="14" fill="#5f5c55">Langue:</text>
-  <text x="648" y="155" font-size="14" font-weight="600" fill="#2b2a27">FR</text>
-  <path d="M682 147l6 6 6-6" fill="none" stroke="#5f5c55" stroke-width="1.6"/>
-  <text x="718" y="155" font-size="14" fill="#8a877f">Opus 5.5 · High</text>
-  <text x="250" y="192" font-size="13" fill="#8a877f">Mode et modèle de cette conversation · langue du mod</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="410" viewBox="0 0 880 410" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+  <title>Le bouton du routeur et son menu, près du sélecteur de modèle</title>
+  <rect width="880" height="410" rx="16" fill="#f6f5f2"/>
+  <rect x="24" y="24" width="832" height="226" rx="14" fill="#eeece7"/>
+  <text x="44" y="66" font-size="16" font-weight="600" fill="#2b2a27">↯ Routeur de modèle · cette conversation</text>
+  <path d="M778 60 L763 60 A15 15 0 0 1 778 45 Z" fill="#f7f7f5"/>
+  <path d="M778 60 L793 60 A15 15 0 0 0 778 45 Z" fill="#1e1e1e"/>
+  <path d="M778 60 L763 60 A15 15 0 0 0 778 75 Z" fill="#efe4cc"/>
+  <path d="M778 60 L793 60 A15 15 0 0 1 778 75 Z" fill="#3b2f22"/>
+  <circle cx="778" cy="60" r="15" fill="none" stroke="#b9b5ac" stroke-width="1.4"/>
+  <rect x="806" y="45" width="30" height="30" rx="8" fill="#e2dfd8"/>
+  <path d="M815 54l12 12M827 54l-12 12" stroke="#5f5c55" stroke-width="1.6"/>
+  <text x="52" y="108" font-size="14" fill="#8a877f">Mode</text>
+  <rect x="170" y="88" width="147" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="244" y="108" font-size="14" text-anchor="middle" fill="#2b2a27">Modèle de l’app</text>
+  <rect x="325.0" y="88" width="90" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="370" y="108" font-size="14" text-anchor="middle" fill="#2b2a27">Suggérer</text>
+  <rect x="422.6" y="88" width="71" height="30" rx="8" fill="#2b2a27" stroke="#2b2a27"/><text x="458" y="108" font-size="14" text-anchor="middle" fill="#ffffff">✓ Auto</text>
+  <text x="52" y="148" font-size="14" fill="#8a877f">Fixer</text>
+  <rect x="170" y="128" width="65" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="202" y="148" font-size="14" text-anchor="middle" fill="#2b2a27">Haiku</text>
+  <rect x="243.0" y="128" width="73" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="280" y="148" font-size="14" text-anchor="middle" fill="#2b2a27">Sonnet</text>
+  <rect x="324.2" y="128" width="57" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="353" y="148" font-size="14" text-anchor="middle" fill="#2b2a27">Opus</text>
+  <rect x="389.0" y="128" width="65" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="422" y="148" font-size="14" text-anchor="middle" fill="#2b2a27">Fable</text>
+  <text x="52" y="188" font-size="14" fill="#8a877f">Effort</text>
+  <rect x="170" y="168" width="49" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="194" y="188" font-size="14" text-anchor="middle" fill="#2b2a27">low</text>
+  <rect x="226.6" y="168" width="87" height="30" rx="8" fill="#2b2a27" stroke="#2b2a27"/><text x="270" y="188" font-size="14" text-anchor="middle" fill="#ffffff">✓ medium</text>
+  <rect x="321.79999999999995" y="168" width="57" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="350" y="188" font-size="14" text-anchor="middle" fill="#2b2a27">high</text>
+  <rect x="386.59999999999997" y="168" width="65" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="419" y="188" font-size="14" text-anchor="middle" fill="#2b2a27">xhigh</text>
+  <rect x="459.59999999999997" y="168" width="49" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="484" y="188" font-size="14" text-anchor="middle" fill="#2b2a27">max</text>
+  <text x="52" y="228" font-size="14" fill="#8a877f">Langue</text>
+  <rect x="170" y="208" width="40" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="190" y="228" font-size="14" text-anchor="middle" fill="#2b2a27">ES</text>
+  <rect x="218.4" y="208" width="40" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="239" y="228" font-size="14" text-anchor="middle" fill="#2b2a27">EN</text>
+  <rect x="266.8" y="208" width="40" height="30" rx="8" fill="#ebe9e4" stroke="#ebe9e4"/><text x="287" y="228" font-size="14" text-anchor="middle" fill="#2b2a27">DE</text>
+  <rect x="315.2" y="208" width="54" height="30" rx="8" fill="#2b2a27" stroke="#2b2a27"/><text x="342" y="228" font-size="14" text-anchor="middle" fill="#ffffff">✓ FR</text>
+  <rect x="24" y="262" width="832" height="64" rx="14" fill="#ffffff" stroke="#d9d6cf"/>
+  <circle cx="54" cy="294" r="11" fill="none" stroke="#8a877f" stroke-width="1.6"/>
+  <path d="M49 294h10M54 289v10" stroke="#8a877f" stroke-width="1.6"/>
+  <text x="80" y="299" font-size="17" fill="#8a877f">Décris ta tâche…</text>
+  <rect x="438" y="340" width="250" height="32" rx="9" fill="#fbe9df" stroke="#d97757" stroke-width="1.5"/>
+  <text x="563" y="361" font-size="14" font-weight="600" text-anchor="middle" fill="#9c3f1f">↯ Auto · Sonnet · medium ▴</text>
+  <rect x="698" y="340" width="158" height="32" rx="9" fill="#ebe9e4"/>
+  <text x="777" y="361" font-size="14" text-anchor="middle" fill="#5f5c55">Opus 5.5 · High</text>
+  <text x="24" y="396" font-size="13" fill="#8a877f">Le bouton ↯ ouvre le menu : mode, fixer un modèle, effort, langue et palette (◐)</text>
 </svg>
