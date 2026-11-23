@@ -149,6 +149,9 @@ async function setLang($: EngineInterface, lang: Lang) {
   await $.store.set('lang', lang)
 }
 
+// Diagnóstico: cuántas veces la app ha pedido dibujar cada sitio (se ve en /modelo).
+const seen: Record<string, number> = {}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const saved = await $.store.get(await keyOf($))
@@ -206,7 +209,9 @@ export const register: Register = on => {
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
     const now = route ? `${LABEL[route.model]} · ${route.effort}${route.isPinned ? ' (pin)' : ''}` : s.appModel
-    return text(s.status(mode, now))
+    const diag = Object.entries(seen).map(([k, n]) => `${k}=${n}`).join(' ') || 'ninguno'
+    return text(`${s.status(mode, now)}
+(diag 0.4.1: dibujos pedidos: ${diag})`)
   })
 
   // --- 1. Clasificar el mensaje (solo si esta conversación tiene el enrutador activo)
@@ -296,6 +301,7 @@ export const register: Register = on => {
   // --- 4. Botón en el pie, junto al selector de la app: abre el menú de opciones ---
   // (la app de escritorio dibuja botones en el pie, pero no desplegables)
   on('ui.render', { component: 'SessionMode' }, async ($, e, next) => {
+    seen[`pie·${e.surface}`] = (seen[`pie·${e.surface}`] ?? 0) + 1
     const s = await t($)
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
@@ -326,6 +332,7 @@ export const register: Register = on => {
 
   // --- 4b. El menú: una fila de modos, otra de idiomas; la opción actual resaltada ---
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
+    seen[`franja·${e.surface}`] = (seen[`franja·${e.surface}`] ?? 0) + 1
     if (e.props.hasSurvey || !(await read($, menuAtom))) return next(e)
     const s = await t($)
     const mode = await read($, modeAtom)
