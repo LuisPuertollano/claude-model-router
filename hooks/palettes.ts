@@ -1,11 +1,12 @@
 import type { Palette } from '../types'
 
-/** Muestra de cada paleta en el botón redondo (un cuarto por paleta). */
-export const SWATCH: Record<Palette, string> = {
-  light: '#f7f7f5',
-  dark: '#1e1e1e',
-  cream: '#efe4cc',
-  creamDark: '#3b2f22',
+/** Punto de color de cada paleta en el botón redondo (un cuarto por paleta).
+ *  Visibles sobre fondo claro y oscuro: el claro va en gris, no en blanco. */
+export const DOT: Record<Palette, string> = {
+  light: '#bdb9b0',
+  dark: '#4a4a4a',
+  cream: '#d9bf8c',
+  creamDark: '#7a5a3a',
 }
 
 export const PALETTES: readonly Palette[] = ['light', 'dark', 'cream', 'creamDark']

@@ -3,7 +3,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import type { Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
 import { LANGS, LANG_NAME, STRINGS, langFromSetting } from './i18n'
-import { MENU, PALETTES, SWATCH } from './palettes'
+import { DOT, MENU, PALETTES } from './palettes'
 
 // Enrutador de modelo y esfuerzo para Claude Code, según "Which Claude model should
 // you build with?" (Anthropic, nov 2026). Todo es POR CONVERSACIÓN: cada una guarda
@@ -404,7 +404,8 @@ export const register: Register = on => {
     const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => {
       const text = isOn ? `✓ ${label}` : label
       return C ? (
-        <Button key={key} plain label={text} onPress={onPress}>
+        // Sin `label`: la app de escritorio dibuja la etiqueta con su color y no el del Text.
+        <Button key={key} plain onPress={onPress}>
           <Text backgroundColor={isOn ? C.on : C.chip} color={isOn ? C.onText : C.chipText} bold={isOn}>
             {` ${text} `}
           </Text>
@@ -432,17 +433,9 @@ export const register: Register = on => {
               {[PALETTES.slice(0, 2), PALETTES.slice(2)].map((pair, i) => (
                 <Box key={`router-palette-row-${i}`}>
                   {pair.map(p => (
-                    <Button
-                      key={`router-palette-${p}`}
-                      plain
-                      label={palette === p ? `${s.palette[p]} ✓ · ${s.paletteOff}` : s.palette[p]}
-                      onPress={() => onPalette(p)}
-                    >
-                      <Text
-                        backgroundColor={SWATCH[p]}
-                        color={p === 'dark' || p === 'creamDark' ? '#f2e6cf' : '#2b2219'}
-                      >
-                        {palette === p ? ' ✓ ' : '   '}
+                    <Button key={`router-palette-${p}`} plain onPress={() => onPalette(p)}>
+                      <Text color={DOT[p]} bold={palette === p}>
+                        {palette === p ? '●✓' : '● '}
                       </Text>
                     </Button>
                   ))}
