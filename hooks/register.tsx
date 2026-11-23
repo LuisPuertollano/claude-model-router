@@ -401,15 +401,14 @@ export const register: Register = on => {
         {children}
       </Box>
     )
+    // La app de escritorio dibuja el texto de cada botón con su propio color (oscuro):
+    // con paleta, cada opción va sobre una pastilla clara (fondo de Box, que sí respeta).
     const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => {
       const text = isOn ? `✓ ${label}` : label
       return C ? (
-        // Sin `label`: la app de escritorio dibuja la etiqueta con su color y no el del Text.
-        <Button key={key} plain onPress={onPress}>
-          <Text backgroundColor={isOn ? C.on : C.chip} color={isOn ? C.onText : C.chipText} bold={isOn}>
-            {` ${text} `}
-          </Text>
-        </Button>
+        <Box key={`${key}-chip`} backgroundColor={isOn ? C.on : C.chip} paddingX={1}>
+          <Button key={key} plain label={text} onPress={onPress} />
+        </Box>
       ) : (
         <Button key={key} label={text} variant={isOn ? 'primary' : 'secondary'} onPress={onPress} />
       )
@@ -433,16 +432,16 @@ export const register: Register = on => {
               {[PALETTES.slice(0, 2), PALETTES.slice(2)].map((pair, i) => (
                 <Box key={`router-palette-row-${i}`}>
                   {pair.map(p => (
-                    <Button key={`router-palette-${p}`} plain onPress={() => onPalette(p)}>
-                      <Text color={DOT[p]} bold={palette === p}>
-                        {palette === p ? '●✓' : '● '}
-                      </Text>
-                    </Button>
+                    <Box key={`router-palette-${p}-chip`} backgroundColor={DOT[p]} paddingX={1}>
+                      <Button key={`router-palette-${p}`} plain label={palette === p ? '✓' : ' '} onPress={() => onPalette(p)} />
+                    </Box>
                   ))}
                 </Box>
               ))}
             </Box>
-            <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+            <Box backgroundColor={C?.chip}>
+              <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+            </Box>
           </Box>
         </Box>
         {row(s.modeRow, modes.map(m => opt(`router-${m}`, s.mode[m], !pinned && mode === m, () => onMode(m))))}

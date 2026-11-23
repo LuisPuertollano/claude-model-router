@@ -1,13 +1,8 @@
 import type { Palette } from '../types'
 
 /** Punto de color de cada paleta en el botón redondo (un cuarto por paleta).
- *  Visibles sobre fondo claro y oscuro: el claro va en gris, no en blanco. */
-export const DOT: Record<Palette, string> = {
-  light: '#bdb9b0',
-  dark: '#4a4a4a',
-  cream: '#d9bf8c',
-  creamDark: '#7a5a3a',
-}
+ *  Se pintan como fondo de una caja: la app no colorea el texto de los botones. */
+export const DOT: Record<Palette, string> = { light: '#f4f2ec', dark: '#6e6e6e', cream: '#e8d3a8', creamDark: '#a5794f' }
 
 export const PALETTES: readonly Palette[] = ['light', 'dark', 'cream', 'creamDark']
 
@@ -23,21 +18,11 @@ export type MenuColors = {
   onText: string
 }
 
+// Las pastillas (chip / on) son claras en todas las paletas: la app pinta el texto de
+// sus botones oscuro y no deja cambiarlo.
 export const MENU: Record<Palette, MenuColors> = {
-  light: {
-    bg: '#ffffff', border: '#d9d6cf', text: '#2b2a27', dim: '#77746c',
-    chip: '#efede8', chipText: '#2b2a27', on: '#2b2a27', onText: '#ffffff',
-  },
-  dark: {
-    bg: '#1e1e1e', border: '#3a3a3a', text: '#f0efe9', dim: '#a3a19a',
-    chip: '#2e2e2e', chipText: '#f0efe9', on: '#f0efe9', onText: '#1e1e1e',
-  },
-  cream: {
-    bg: '#f5ecd9', border: '#d9c9a8', text: '#2b2219', dim: '#6b5d4c',
-    chip: '#ebdfc4', chipText: '#2b2219', on: '#9a5b2e', onText: '#fff8ea',
-  },
-  creamDark: {
-    bg: '#2d241a', border: '#4a3b2b', text: '#f2e6cf', dim: '#b3a389',
-    chip: '#3b2f22', chipText: '#f2e6cf', on: '#e0b878', onText: '#2d241a',
-  },
+  light: { bg: '#ffffff', border: '#d9d6cf', text: '#2b2a27', dim: '#77746c', chip: '#efede8', chipText: '#2b2a27', on: '#d8d2c4', onText: '#2b2a27' },
+  dark: { bg: '#1e1e1e', border: '#3a3a3a', text: '#f0efe9', dim: '#b5b3ac', chip: '#e4e2dc', chipText: '#1e1e1e', on: '#a9c4ee', onText: '#1e1e1e' },
+  cream: { bg: '#f5ecd9', border: '#d9c9a8', text: '#2b2219', dim: '#6b5d4c', chip: '#ebdfc4', chipText: '#2b2219', on: '#e0b878', onText: '#2b2219' },
+  creamDark: { bg: '#2d241a', border: '#4a3b2b', text: '#f2e6cf', dim: '#c4b498', chip: '#efe0c2', chipText: '#2d241a', on: '#e0b878', onText: '#2d241a' },
 }
