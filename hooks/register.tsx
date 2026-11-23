@@ -3,7 +3,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import type { Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
 import { LANGS, LANG_NAME, STRINGS, langFromSetting } from './i18n'
-import { DISC, DOT, MENU, PALETTES } from './palettes'
+import { DOT, MENU, PALETTES, SWATCH } from './palettes'
 
 // Enrutador de modelo y esfuerzo para Claude Code, según "Which Claude model should
 // you build with?" (Anthropic, nov 2026). Todo es POR CONVERSACIÓN: cada una guarda
@@ -427,36 +427,20 @@ export const register: Register = on => {
             ↯ {s.title}
           </Text>
           <Box alignItems="center" columnGap={1}>
-            {/* Botón redondo en cuatro cuartos (claro · oscuro / crema clara · crema oscura).
-                La app no tiene círculos: se escalona en filas de cajas, cada media fila un botón. */}
-            <Box flexDirection="column" alignItems="center" rowGap={0}>
-              {DISC.map((half, i) => {
-                const [left, right] = (i < DISC.length / 2 ? ['light', 'dark'] : ['cream', 'creamDark']) as [Palette, Palette]
-                const isMid = i === DISC.length / 2 - 1 || i === DISC.length / 2
-                const cell = (p: Palette, side: 'l' | 'r') => (
-                  <Box
-                    key={`router-disc-${i}${side}`}
-                    width={half}
-                    height={1}
-                    overflow="hidden"
-                    backgroundColor={DOT[p]}
-                    justifyContent={side === 'l' ? 'flex-end' : 'flex-start'}
-                  >
-                    <Button
-                      key={`router-palette-${p}${isMid ? '' : `-${i}`}`}
-                      plain
-                      label={palette === p && isMid ? '✓' : ' '}
-                      onPress={() => onPalette(p)}
-                    />
-                  </Box>
-                )
-                return (
-                  <Box key={`router-disc-row-${i}`} columnGap={0}>
-                    {cell(left, 'l')}
-                    {cell(right, 'r')}
-                  </Box>
-                )
-              })}
+            {/* Selector de paleta: cuatro rectángulos iguales en fila (claro · oscuro · crema clara · crema oscura) */}
+            <Box alignItems="center" columnGap={1}>
+              {PALETTES.map(p => (
+                <Box
+                  key={`router-palette-${p}-chip`}
+                  width={SWATCH}
+                  height={1}
+                  overflow="hidden"
+                  justifyContent="center"
+                  backgroundColor={DOT[p]}
+                >
+                  <Button key={`router-palette-${p}`} plain label={palette === p ? '✓' : ' '} onPress={() => onPalette(p)} />
+                </Box>
+              ))}
             </Box>
             <Box backgroundColor={C?.chip}>
               <Button key="router-close" label="✕" role="dismiss" onPress={close} />
