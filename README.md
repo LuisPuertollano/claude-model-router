@@ -49,7 +49,7 @@ At the start of each new task, use the model-advisor skill to tell me in one lin
 | Mode: *Auto* | Picks on the first message; afterwards only suggests upgrades, with their cost. |
 | Pin: *Opus…* | Pins that model in this conversation. |
 | Effort: *low … max* | Sets the effort; same model, so no re-processing. |
-| ◐ round button (top right) | Colours of the router's menu (only the menu): light, dark, light cream or dark cream; press the active one again for the app's. All conversations. |
+| Palette: ▭ ▭ ▭ ▭ (four swatches beside the title) | Colours of the router's menu only, not the rest of the app: light, dark, light cream or dark cream. The active one shows a ✓; press it again to go back to the app's colours. Applies to all conversations. |
 | Language: *ES · EN · DE · FR* | Language of the mod (all conversations). |
 | `/modelo opus high` | Pins model and effort. |
 | `/modelo libre` | Back to the app's model. |
