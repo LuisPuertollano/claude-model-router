@@ -430,11 +430,13 @@ export const register: Register = on => {
             {/* Selector de paleta: cuatro rectángulos iguales en fila (claro · oscuro · crema clara · crema oscura) */}
             <Box alignItems="center" columnGap={1}>
               {PALETTES.map(p => (
+                // El botón se estira a todo el rectángulo: al pasar el ratón se marca entero.
                 <Box
                   key={`router-palette-${p}-chip`}
                   width={SWATCH}
                   overflow="hidden"
-                  justifyContent="center"
+                  flexDirection="column"
+                  alignItems="stretch"
                   backgroundColor={DOT[p]}
                   borderStyle="single"
                   borderColor={C?.dim ?? '#77746c'}
