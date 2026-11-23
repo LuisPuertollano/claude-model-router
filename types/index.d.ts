@@ -3,7 +3,7 @@ export type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 export type Mode = 'auto' | 'sugerir' | 'off'
 export type Lang = 'es' | 'en' | 'de' | 'fr'
 /** Paleta de colores de la app: claro, oscuro, crema clara, crema oscura. */
-export type Palette = 'light' | 'dark' | 'cream' | 'creamDark'
+export type Palette = 'light' | 'dark' | 'cream' | 'creamDark' | 'sage' | 'night'
 
 export type Route = {
   model: Tier

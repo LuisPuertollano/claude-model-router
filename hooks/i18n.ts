@@ -41,7 +41,7 @@ export type Strings = {
 
 const es: Strings = {
   modelLabel: 'Modelo',
-  palette: { light: 'Claro', dark: 'Oscuro', cream: 'Crema clara', creamDark: 'Crema oscura' },
+  palette: { light: 'Claro', dark: 'Oscuro', cream: 'Crema clara', creamDark: 'Crema oscura', sage: 'Verde salvia', night: 'Azul noche' },
   paletteOff: 'Colores de la app',
   router: 'Enrutador',
   title: 'Enrutador de modelo · solo esta conversación',
@@ -84,7 +84,7 @@ const es: Strings = {
 
 const en: Strings = {
   modelLabel: 'Model',
-  palette: { light: 'Light', dark: 'Dark', cream: 'Light cream', creamDark: 'Dark cream' },
+  palette: { light: 'Light', dark: 'Dark', cream: 'Light cream', creamDark: 'Dark cream', sage: 'Sage green', night: 'Night blue' },
   paletteOff: 'App colours',
   router: 'Router',
   title: 'Model router · this conversation only',
@@ -127,7 +127,7 @@ const en: Strings = {
 
 const de: Strings = {
   modelLabel: 'Modell',
-  palette: { light: 'Hell', dark: 'Dunkel', cream: 'Creme hell', creamDark: 'Creme dunkel' },
+  palette: { light: 'Hell', dark: 'Dunkel', cream: 'Creme hell', creamDark: 'Creme dunkel', sage: 'Salbeigrün', night: 'Nachtblau' },
   paletteOff: 'Farben der App',
   router: 'Router',
   title: 'Modell-Router · nur diese Unterhaltung',
@@ -170,7 +170,7 @@ const de: Strings = {
 
 const fr: Strings = {
   modelLabel: 'Modèle',
-  palette: { light: 'Clair', dark: 'Sombre', cream: 'Crème clair', creamDark: 'Crème foncé' },
+  palette: { light: 'Clair', dark: 'Sombre', cream: 'Crème clair', creamDark: 'Crème foncé', sage: 'Vert sauge', night: 'Bleu nuit' },
   paletteOff: 'Couleurs de l’app',
   router: 'Routeur',
   title: 'Routeur de modèle · cette conversation',

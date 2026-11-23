@@ -49,7 +49,7 @@ Au début de chaque nouvelle tâche, utilise la skill model-advisor pour me dire
 | Mode : *Auto* | Choisit au premier message ; ensuite ne suggère que de monter, avec le coût. |
 | Fixer : *Opus…* | Fixe ce modèle dans cette conversation. |
 | Effort : *low … max* | Change l’effort ; même modèle, donc pas de retraitement. |
-| Palette : ▭ ▭ ▭ ▭ (quatre pastilles à côté du titre) | Couleurs du seul menu du routeur, pas du reste de l’app : clair, sombre, crème clair ou crème foncé. L’active porte un ✓ ; appuyer à nouveau revient aux couleurs de l’app. Vaut pour toutes les conversations. |
+| Palette : ▭ ▭ ▭ ▭ ▭ ▭ (six pastilles à côté du titre) | Couleurs du seul menu du routeur, pas du reste de l’app : clair, sombre, crème clair, crème foncé, vert sauge ou bleu nuit. L’active porte un ✓ ; appuyer à nouveau revient aux couleurs de l’app. Vaut pour toutes les conversations. |
 | Langue : *ES · EN · DE · FR* | Langue du mod (toutes les conversations). |
 | `/modelo opus high` | Fixe modèle et effort. |
 | `/modelo libre` | Revient au modèle de l’app. |

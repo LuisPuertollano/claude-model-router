@@ -49,7 +49,7 @@ Nutze zu Beginn jeder neuen Aufgabe den Skill model-advisor, um mir in einer Zei
 | Modus: *Auto* | Wählt bei der ersten Nachricht; danach nur Vorschläge nach oben, mit Kosten. |
 | Fixieren: *Opus…* | Fixiert dieses Modell in dieser Unterhaltung. |
 | Aufwand: *low … max* | Ändert den Aufwand; gleiches Modell, also keine Neuverarbeitung. |
-| Palette: ▭ ▭ ▭ ▭ (vier Farbfelder neben dem Titel) | Farben nur des Router-Menüs, nicht der übrigen App: hell, dunkel, Creme hell oder Creme dunkel. Die aktive trägt ein ✓; erneut drücken stellt die Farben der App wieder her. Gilt für alle Unterhaltungen. |
+| Palette: ▭ ▭ ▭ ▭ ▭ ▭ (sechs Farbfelder neben dem Titel) | Farben nur des Router-Menüs, nicht der übrigen App: hell, dunkel, Creme hell, Creme dunkel, Salbeigrün oder Nachtblau. Die aktive trägt ein ✓; erneut drücken stellt die Farben der App wieder her. Gilt für alle Unterhaltungen. |
 | Sprache: *ES · EN · DE · FR* | Sprache der Mod (alle Unterhaltungen). |
 | `/modelo opus high` | Fixiert Modell und Aufwand. |
 | `/modelo libre` | Zurück zum Modell der App. |

@@ -49,7 +49,7 @@ Al empezar cada tarea nueva, usa la skill model-advisor para decirme en una lín
 | Modo: *Auto* | Elige en el primer mensaje; después solo sugiere subir, con su coste. |
 | Fijar: *Opus…* | Fija ese modelo en esta conversación. |
 | Esfuerzo: *low … max* | Cambia el esfuerzo; mismo modelo, así que no reprocesa. |
-| Paleta: ▭ ▭ ▭ ▭ (cuatro rectángulos junto al título) | Colores solo del menú del enrutador, no del resto de la app: claro, oscuro, crema clara o crema oscura. La activa lleva un ✓; pulsarla otra vez vuelve a los colores de la app. Vale para todas las conversaciones. |
+| Paleta: ▭ ▭ ▭ ▭ ▭ ▭ (seis rectángulos junto al título) | Colores solo del menú del enrutador, no del resto de la app: claro, oscuro, crema clara, crema oscura, verde salvia o azul noche. La activa lleva un ✓; pulsarla otra vez vuelve a los colores de la app. Vale para todas las conversaciones. |
 | Idioma: *ES · EN · DE · FR* | Idioma de la mod (todas las conversaciones). |
 | `/modelo opus high` | Fija modelo y esfuerzo. |
 | `/modelo libre` | Vuelve al modelo de la app. |
