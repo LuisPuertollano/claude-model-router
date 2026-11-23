@@ -4,11 +4,11 @@
 
 **El modelo y el esfuerzo de Claude adecuados para cada conversación, siguiendo la guía de Anthropic, sin reprocesar el contexto a tus espaldas.**
 
-![Los desplegables del enrutador junto al selector de modelo](docs/img/es/footer.svg)
+![El botón del enrutador junto al selector de modelo](docs/img/es/footer.svg)
 
 Casi todo el mundo usa el mismo modelo y el mismo esfuerzo para todo: paga de más en lo sencillo y se queda corto en lo difícil. Este plugin lo resuelve:
 
-- **Claude Code: una mod con dos desplegables junto al selector de modelo.** *Modelo* fija el modo de esta conversación: el modelo de la app, *Sugerir*, *Auto* o fijar Haiku, Sonnet, Opus o Fable. *Idioma* cambia la mod entre ES, EN, DE y FR. Cada conversación recuerda su modo; las nuevas empiezan apagadas.
+- **Claude Code: un botón `↯ Enrutador ▾` junto al selector de modelo.** Abre un menú encima del cuadro de texto: *Modo* (modelo de la app, *Sugerir*, *Auto*), *Fijar* Haiku, Sonnet, Opus o Fable, *Esfuerzo* (low → max) e *Idioma* (ES, EN, DE, FR). Cada conversación recuerda su modo; las nuevas empiezan apagadas.
 - **Haiku clasifica tu mensaje** con las reglas de [*Which Claude model should you build with?*](https://claude.dev/blog/which-claude-model-should-you-build-with/) de Anthropic: Haiku para lo simple y repetitivo, Sonnet para lo acotado, Opus por defecto y Fable solo para lo ambicioso y abierto. El esfuerzo sale de cuatro preguntas: ¿ida y vuelta? `low` · ¿un error saldría caro? `high` · ¿trabajo largo y crítico? `xhigh` · si no, `medium`.
 - **Sin gastos ocultos.** Cambiar de modelo a mitad de conversación reprocesa todo el contexto, porque la caché es de cada modelo. Por eso la mod solo cambia sola en el **primer mensaje**. Después **sugiere**, enseña los tokens que costaría y no cambia nada hasta que pulsas *Cambiar*.
 - **Subagentes más baratos.** En *Auto*, Explore va a Haiku y los demás subagentes genéricos se clasifican, sin pasar nunca del modelo de la conversación.
@@ -44,16 +44,17 @@ Al empezar cada tarea nueva, usa la skill model-advisor para decirme en una lín
 
 | Control | Efecto (solo en esta conversación) |
 | --- | --- |
-| Modelo: *de la app* | Apagado: se usa el modelo elegido en la app. |
-| Modelo: *Sugerir* | Muestra la sugerencia; nada cambia hasta que pulses *Cambiar*. |
-| Modelo: *Auto* | Elige en el primer mensaje; después solo sugiere subir, con su coste. |
-| Modelo: *Fijar Opus…* | Fija ese modelo en esta conversación. |
+| Modo: *Modelo de la app* | Apagado: se usa el modelo elegido en la app. |
+| Modo: *Sugerir* | Muestra la sugerencia; nada cambia hasta que pulses *Cambiar*. |
+| Modo: *Auto* | Elige en el primer mensaje; después solo sugiere subir, con su coste. |
+| Fijar: *Opus…* | Fija ese modelo en esta conversación. |
+| Esfuerzo: *low … max* | Cambia el esfuerzo; mismo modelo, así que no reprocesa. |
 | Idioma: *ES · EN · DE · FR* | Idioma de la mod (todas las conversaciones). |
 | `/modelo opus high` | Fija modelo y esfuerzo. |
 | `/modelo libre` | Vuelve al modelo de la app. |
 | `/modelo idioma es` | Cambia el idioma. |
 
-Un punto (•) en el desplegable indica una sugerencia pendiente. El idioma de la mod parte del ajuste `language` de Claude Code.
+Un punto (•) en el botón indica una sugerencia pendiente. El idioma de la mod parte del ajuste `language` de Claude Code.
 
 ## Coste
 
@@ -61,8 +62,8 @@ Cada mensaje que se clasifica cuesta una llamada corta a Haiku 5.5, una fracció
 
 ## Límites
 
-- Los desplegables solo existen en **Claude Code**. En el Chat y en Cowork nada puede cambiar el modelo de la conversación: ahí el plugin aconseja y tú cambias.
-- El selector de modelo de la app no cambia de aspecto; el modelo que se usa es el que indica el desplegable.
+- El botón y el menú solo existen en **Claude Code**. En el Chat y en Cowork nada puede cambiar el modelo de la conversación: ahí el plugin aconseja y tú cambias.
+- El selector de modelo de la app no cambia de aspecto; el modelo que se usa es el que indica el botón del enrutador.
 - La estimación de coste usa precios de lista; con una suscripción cuenta en tokens, no en dinero.
 - Apagar el enrutador a mitad de conversación devuelve el modelo de la app, y eso también reprocesa el contexto. La mod avisa.
 

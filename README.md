@@ -4,11 +4,11 @@
 
 **The right Claude model and effort for each conversation, following Anthropic's guide, without re-processing your context behind your back.**
 
-![The router's dropdowns next to the model picker](docs/img/en/footer.svg)
+![The router's button next to the model picker](docs/img/en/footer.svg)
 
 Most people run everything on the same model and effort: they overpay on simple work and fall short on hard work. This plugin fixes that:
 
-- **Claude Code — a mod with two dropdowns next to the model picker.** *Model* sets this conversation's mode: the app's model, *Suggest*, *Auto*, or pin Haiku, Sonnet, Opus or Fable. *Language* switches the mod between ES, EN, DE and FR. Each conversation remembers its own mode; new ones start off.
+- **Claude Code — a `↯ Router ▾` button next to the model picker.** It opens a menu above the prompt: *Mode* (the app's model, *Suggest*, *Auto*), *Pin* Haiku, Sonnet, Opus or Fable, *Effort* (low → max) and *Language* (ES, EN, DE, FR). Each conversation remembers its own mode; new ones start off.
 - **Haiku classifies your message** with the rules of Anthropic's [*Which Claude model should you build with?*](https://claude.dev/blog/which-claude-model-should-you-build-with/): Haiku for simple and repetitive work, Sonnet for scoped tasks, Opus by default, Fable only for ambitious open-ended work. Effort comes from four questions: back-and-forth? `low` · costly mistake? `high` · long critical job? `xhigh` · otherwise `medium`.
 - **No hidden costs.** Switching model mid-conversation re-processes the whole context, because the cache belongs to each model. So the mod only switches by itself on the **first message**. After that it **suggests**, shows the tokens a switch would cost, and changes nothing until you press *Switch*.
 - **Cheaper subagents.** In *Auto*, Explore runs on Haiku and other generic subagents are classified, never above the conversation's model.
@@ -44,16 +44,17 @@ At the start of each new task, use the model-advisor skill to tell me in one lin
 
 | Control | Effect (this conversation only) |
 | --- | --- |
-| Model: *app's* | Off: the model picked in the app is used. |
-| Model: *Suggest* | Shows the suggestion; nothing changes until you press *Switch*. |
-| Model: *Auto* | Picks on the first message; afterwards only suggests upgrades, with their cost. |
-| Model: *Pin Opus…* | Pins that model in this conversation. |
+| Mode: *App's model* | Off: the model picked in the app is used. |
+| Mode: *Suggest* | Shows the suggestion; nothing changes until you press *Switch*. |
+| Mode: *Auto* | Picks on the first message; afterwards only suggests upgrades, with their cost. |
+| Pin: *Opus…* | Pins that model in this conversation. |
+| Effort: *low … max* | Sets the effort; same model, so no re-processing. |
 | Language: *ES · EN · DE · FR* | Language of the mod (all conversations). |
 | `/modelo opus high` | Pins model and effort. |
 | `/modelo libre` | Back to the app's model. |
 | `/modelo idioma de` | Changes the language. |
 
-A dot (•) in the dropdown means a suggestion is waiting. The mod's language starts from Claude Code's `language` setting.
+A dot (•) on the button means a suggestion is waiting. The mod's language starts from Claude Code's `language` setting.
 
 ## Cost
 
@@ -61,8 +62,8 @@ Each classified message costs one short Haiku 5.5 call, a fraction of a cent. Sh
 
 ## Limits
 
-- The dropdowns exist only in **Claude Code**. In Chat and Cowork nothing can change the conversation's model, so there the plugin advises and you switch.
-- The app's model picker doesn't change its look; the model in use is the one the dropdown shows.
+- The button and menu exist only in **Claude Code**. In Chat and Cowork nothing can change the conversation's model, so there the plugin advises and you switch.
+- The app's model picker doesn't change its look; the model in use is the one the router's button shows.
 - Cost estimates use list prices; on a subscription it counts in tokens, not money.
 - Turning the router off mid-conversation brings back the app's model, which also re-processes the context. The mod warns you.
 

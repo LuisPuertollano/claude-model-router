@@ -12,6 +12,11 @@ export const LANG_NAME: Record<Lang, string> = {
 
 export type Strings = {
   modelLabel: string
+  router: string
+  title: string
+  modeRow: string
+  pinRow: string
+  effortRow: string
   langLabel: string
   mode: Record<Mode, string>
   pin: (model: string) => string
@@ -34,8 +39,13 @@ export type Strings = {
 
 const es: Strings = {
   modelLabel: 'Modelo',
+  router: 'Enrutador',
+  title: 'Enrutador de modelo · solo esta conversación',
+  modeRow: 'Modo',
+  pinRow: 'Fijar',
+  effortRow: 'Esfuerzo',
   langLabel: 'Idioma',
-  mode: { off: 'de la app', sugerir: 'Sugerir', auto: 'Auto' },
+  mode: { off: "Modelo de la app", sugerir: 'Sugerir', auto: 'Auto' },
   pin: m => `Fijar ${m}`,
   toast: {
     off: 'Enrutador apagado en esta conversación: manda el modelo de la app.',
@@ -70,8 +80,13 @@ const es: Strings = {
 
 const en: Strings = {
   modelLabel: 'Model',
+  router: 'Router',
+  title: 'Model router · this conversation only',
+  modeRow: 'Mode',
+  pinRow: 'Pin',
+  effortRow: 'Effort',
   langLabel: 'Language',
-  mode: { off: "app's", sugerir: 'Suggest', auto: 'Auto' },
+  mode: { off: "App's model", sugerir: 'Suggest', auto: 'Auto' },
   pin: m => `Pin ${m}`,
   toast: {
     off: "Router off in this conversation: the app's model is used.",
@@ -106,8 +121,13 @@ const en: Strings = {
 
 const de: Strings = {
   modelLabel: 'Modell',
+  router: 'Router',
+  title: 'Modell-Router · nur diese Unterhaltung',
+  modeRow: 'Modus',
+  pinRow: 'Fixieren',
+  effortRow: 'Aufwand',
   langLabel: 'Sprache',
-  mode: { off: 'der App', sugerir: 'Vorschlagen', auto: 'Auto' },
+  mode: { off: "Modell der App", sugerir: 'Vorschlagen', auto: 'Auto' },
   pin: m => `${m} fixieren`,
   toast: {
     off: 'Router in dieser Unterhaltung aus: es gilt das Modell der App.',
@@ -142,8 +162,13 @@ const de: Strings = {
 
 const fr: Strings = {
   modelLabel: 'Modèle',
+  router: 'Routeur',
+  title: 'Routeur de modèle · cette conversation',
+  modeRow: 'Mode',
+  pinRow: 'Fixer',
+  effortRow: 'Effort',
   langLabel: 'Langue',
-  mode: { off: "de l'app", sugerir: 'Suggérer', auto: 'Auto' },
+  mode: { off: "Modèle de l’app", sugerir: 'Suggérer', auto: 'Auto' },
   pin: m => `Fixer ${m}`,
   toast: {
     off: "Routeur désactivé dans cette conversation : le modèle de l'app est utilisé.",

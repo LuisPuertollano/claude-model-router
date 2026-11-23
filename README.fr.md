@@ -4,11 +4,11 @@
 
 **Le bon modèle Claude et le bon effort pour chaque conversation, selon le guide d’Anthropic, sans retraiter ton contexte dans ton dos.**
 
-![Les menus déroulants du routeur près du sélecteur de modèle](docs/img/fr/footer.svg)
+![Le bouton du routeur près du sélecteur de modèle](docs/img/fr/footer.svg)
 
 La plupart des gens utilisent le même modèle et le même effort pour tout : ils paient trop pour le simple et manquent de puissance pour le difficile. Ce plugin règle ça :
 
-- **Claude Code : un mod avec deux menus déroulants près du sélecteur de modèle.** *Modèle* fixe le mode de cette conversation : le modèle de l’app, *Suggérer*, *Auto*, ou fixer Haiku, Sonnet, Opus ou Fable. *Langue* passe le mod en ES, EN, DE ou FR. Chaque conversation retient son mode ; les nouvelles démarrent désactivées.
+- **Claude Code : un bouton `↯ Routeur ▾` près du sélecteur de modèle.** Il ouvre un menu au-dessus de la zone de saisie : *Mode* (modèle de l’app, *Suggérer*, *Auto*), *Fixer* Haiku, Sonnet, Opus ou Fable, *Effort* (low → max) et *Langue* (ES, EN, DE, FR). Chaque conversation retient son mode ; les nouvelles démarrent désactivées.
 - **Haiku classe ton message** avec les règles de [*Which Claude model should you build with?*](https://claude.dev/blog/which-claude-model-should-you-build-with/) d’Anthropic : Haiku pour le simple et répétitif, Sonnet pour le cadré, Opus par défaut, Fable seulement pour le travail ambitieux et ouvert. L’effort découle de quatre questions : allers-retours ? `low` · erreur coûteuse ? `high` · long travail critique ? `xhigh` · sinon `medium`.
 - **Pas de coûts cachés.** Changer de modèle en cours de conversation retraite tout le contexte, car le cache appartient à chaque modèle. Le mod ne change donc tout seul qu’au **premier message**. Ensuite il **suggère**, montre les tokens que ça coûterait et ne change rien tant que tu n’appuies pas sur *Changer*.
 - **Sous-agents moins chers.** En *Auto*, Explore tourne sur Haiku et les autres sous-agents génériques sont classés, jamais au-dessus du modèle de la conversation.
@@ -44,16 +44,17 @@ Au début de chaque nouvelle tâche, utilise la skill model-advisor pour me dire
 
 | Contrôle | Effet (cette conversation seulement) |
 | --- | --- |
-| Modèle : *de l’app* | Désactivé : le modèle choisi dans l’app est utilisé. |
-| Modèle : *Suggérer* | Montre la suggestion ; rien ne change sans *Changer*. |
-| Modèle : *Auto* | Choisit au premier message ; ensuite ne suggère que de monter, avec le coût. |
-| Modèle : *Fixer Opus…* | Fixe ce modèle dans cette conversation. |
+| Mode : *Modèle de l’app* | Désactivé : le modèle choisi dans l’app est utilisé. |
+| Mode : *Suggérer* | Montre la suggestion ; rien ne change sans *Changer*. |
+| Mode : *Auto* | Choisit au premier message ; ensuite ne suggère que de monter, avec le coût. |
+| Fixer : *Opus…* | Fixe ce modèle dans cette conversation. |
+| Effort : *low … max* | Change l’effort ; même modèle, donc pas de retraitement. |
 | Langue : *ES · EN · DE · FR* | Langue du mod (toutes les conversations). |
 | `/modelo opus high` | Fixe modèle et effort. |
 | `/modelo libre` | Revient au modèle de l’app. |
 | `/modelo idioma fr` | Change la langue. |
 
-Un point (•) dans le menu signale une suggestion en attente. La langue du mod part du réglage `language` de Claude Code.
+Un point (•) sur le bouton signale une suggestion en attente. La langue du mod part du réglage `language` de Claude Code.
 
 ## Coût
 
@@ -61,8 +62,8 @@ Chaque message classé coûte un court appel à Haiku 5.5, une fraction de centi
 
 ## Limites
 
-- Les menus déroulants n’existent que dans **Claude Code**. Dans Chat et Cowork, rien ne peut changer le modèle de la conversation : le plugin conseille et c’est toi qui changes.
-- Le sélecteur de modèle de l’app ne change pas d’aspect ; le modèle utilisé est celui qu’indique le menu.
+- Le bouton et le menu n’existent que dans **Claude Code**. Dans Chat et Cowork, rien ne peut changer le modèle de la conversation : le plugin conseille et c’est toi qui changes.
+- Le sélecteur de modèle de l’app ne change pas d’aspect ; le modèle utilisé est celui qu’indique le bouton du routeur.
 - L’estimation de coût utilise les prix catalogue ; avec un abonnement, ça compte en tokens, pas en argent.
 - Désactiver le routeur en cours de conversation rétablit le modèle de l’app, ce qui retraite aussi le contexte. Le mod prévient.
 

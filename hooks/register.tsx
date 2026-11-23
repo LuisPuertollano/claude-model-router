@@ -149,9 +149,6 @@ async function setLang($: EngineInterface, lang: Lang) {
   await $.store.set('lang', lang)
 }
 
-// Diagnóstico: cuántas veces la app ha pedido dibujar cada sitio (se ve en /modelo).
-const seen: Record<string, number> = {}
-
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const saved = await $.store.get(await keyOf($))
@@ -209,9 +206,7 @@ export const register: Register = on => {
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
     const now = route ? `${LABEL[route.model]} · ${route.effort}${route.isPinned ? ' (pin)' : ''}` : s.appModel
-    const diag = Object.entries(seen).map(([k, n]) => `${k}=${n}`).join(' ') || 'ninguno'
-    return text(`${s.status(mode, now)}
-(diag 0.4.1: dibujos pedidos: ${diag})`)
+    return text(s.status(mode, now))
   })
 
   // --- 1. Clasificar el mensaje (solo si esta conversación tiene el enrutador activo)
@@ -301,28 +296,28 @@ export const register: Register = on => {
   // --- 4. Botón en el pie, junto al selector de la app: abre el menú de opciones ---
   // (la app de escritorio dibuja botones en el pie, pero no desplegables)
   on('ui.render', { component: 'SessionMode' }, async ($, e, next) => {
-    seen[`pie·${e.surface}`] = (seen[`pie·${e.surface}`] ?? 0) + 1
     const s = await t($)
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
     const pending = await read($, pendingAtom)
     const isOpen = await read($, menuAtom)
     const { Box, Button } = $.ui.resolve(e)
-    const pick = route ? ` · ${SHORT[route.model]}·${route.effort}` : ''
     const now =
-      route?.isPinned && mode !== 'off'
-        ? `${s.pin(SHORT[route.model])} · ${route.effort}`
-        : mode === 'auto'
-          ? `${s.mode.auto}${pick}`
-          : s.mode[mode]
+      mode === 'off'
+        ? s.router
+        : route?.isPinned
+          ? `📌 ${SHORT[route.model]} · ${route.effort}`
+          : route
+            ? `${s.mode[mode]} · ${SHORT[route.model]} · ${route.effort}`
+            : `${s.router} · ${s.mode[mode]}`
     const dot = pending && mode !== 'off' ? ' •' : ''
     const engine = await next(e)
     return (
-      <Box>
+      <Box alignItems="center" columnGap={1}>
         <Button
           key="router-menu"
-          plain
-          label={`${s.modelLabel}: ${now}${dot} ${isOpen ? '▴' : '▾'}`}
+          variant={isOpen ? 'primary' : 'secondary'}
+          label={`↯ ${now}${dot} ${isOpen ? '▴' : '▾'}`}
           onPress={() => update($, menuAtom, v => !v)}
         />
         {engine}
@@ -330,69 +325,74 @@ export const register: Register = on => {
     )
   })
 
-  // --- 4b. El menú: una fila de modos, otra de idiomas; la opción actual resaltada ---
+  // --- 4b. El menú: título, modo, fijar modelo, esfuerzo e idioma; lo actual resaltado ---
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    seen[`franja·${e.surface}`] = (seen[`franja·${e.surface}`] ?? 0) + 1
     if (e.props.hasSurvey || !(await read($, menuAtom))) return next(e)
     const s = await t($)
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
     const lang = await read($, langAtom)
     const { Box, Button, Text } = $.ui.resolve(e)
-    const value = route?.isPinned && mode !== 'off' ? `pin:${route.model}` : mode
-    const options = [
-      { value: 'off', label: s.mode.off },
-      { value: 'sugerir', label: s.mode.sugerir },
-      { value: 'auto', label: s.mode.auto },
-      ...TIERS.map(tier => ({ value: `pin:${tier}`, label: s.pin(SHORT[tier]) })),
-    ]
+    const pinned = route?.isPinned && mode !== 'off' ? route.model : null
     const close = () => update($, menuAtom, () => false)
-    const onModel = async (v: string) => {
+
+    const onMode = async (m: Mode) => {
       const str = await t($)
-      await close()
-      if (v.startsWith('pin:')) {
-        const tier = v.slice(4) as Tier
-        const effort = (await read($, routeAtom))?.effort ?? 'medium'
-        const note = await pin($, tier, effort)
-        $.ui.toast(str.toastPin(LABEL[tier], effort, note))
-        return
-      }
-      const m = v as Mode
       // Elegir un modo suelta el modelo fijado y vuelve a dejar decidir al enrutador.
       const r = await read($, routeAtom)
       if (r?.isPinned) await update($, routeAtom, () => ({ ...r, isPinned: false }))
       await setMode($, m)
       $.ui.toast(str.toast[m])
     }
-    const onLang = async (v: Lang) => {
-      await setLang($, v)
-      $.ui.toast(STRINGS[v].toastLang)
+    const onPin = async (tier: Tier) => {
+      const str = await t($)
+      const effort = (await read($, routeAtom))?.effort ?? 'medium'
+      const note = await pin($, tier, effort)
+      $.ui.toast(str.toastPin(LABEL[tier], effort, note))
     }
-    return (
-      <Box flexDirection="column">
-        <Box>
-          <Text dimColor>{s.modelLabel}: </Text>
-          {options.map(o => (
-            <Button
-              key={`router-${o.value}`}
-              label={o.value === value ? `✓ ${o.label}` : o.label}
-              variant={o.value === value ? 'primary' : 'secondary'}
-              onPress={() => onModel(o.value)}
-            />
-          ))}
+    const onEffort = async (effort: Effort) => {
+      // Mismo modelo que ahora (el del enrutador o el último que respondió); solo cambia el esfuerzo,
+      // así que no reprocesa el contexto.
+      const tier = (await current($)) ?? 'opus'
+      const note = await pin($, tier, effort)
+      $.ui.toast((await t($)).toastPin(LABEL[tier], effort, note))
+    }
+    const onLang = async (l: Lang) => {
+      await setLang($, l)
+      $.ui.toast(STRINGS[l].toastLang)
+    }
+
+    const row = (label: string, children: JSX.Element[]) => (
+      <Box alignItems="center" columnGap={1}>
+        <Box width={10}>
+          <Text dimColor>{label}</Text>
         </Box>
-        <Box>
-          <Text dimColor>{s.langLabel}: </Text>
-          {LANGS.map(l => (
-            <Button
-              key={`router-lang-${l}`}
-              label={l === lang ? `✓ ${l.toUpperCase()}` : l.toUpperCase()}
-              variant={l === lang ? 'primary' : 'secondary'}
-              onPress={() => onLang(l)}
-            />
-          ))}
+        {children}
+      </Box>
+    )
+    const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => (
+      <Button
+        key={key}
+        label={isOn ? `✓ ${label}` : label}
+        variant={isOn ? 'primary' : 'secondary'}
+        onPress={onPress}
+      />
+    )
+    const modes: Mode[] = ['off', 'sugerir', 'auto']
+    const efforts: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max']
+    return (
+      <Box flexDirection="column" rowGap={1} paddingX={1}>
+        <Box justifyContent="space-between" alignItems="center">
+          <Text bold>↯ {s.title}</Text>
           <Button key="router-close" label="✕" role="dismiss" onPress={close} />
         </Box>
+        {row(s.modeRow, modes.map(m => opt(`router-${m}`, s.mode[m], !pinned && mode === m, () => onMode(m))))}
+        {row(s.pinRow, TIERS.map(tier => opt(`router-pin:${tier}`, SHORT[tier], pinned === tier, () => onPin(tier))))}
+        {row(
+          s.effortRow,
+          efforts.map(ef => opt(`router-effort-${ef}`, ef, mode !== 'off' && route?.effort === ef, () => onEffort(ef))),
+        )}
+        {row(s.langLabel, LANGS.map(l => opt(`router-lang-${l}`, l.toUpperCase(), l === lang, () => onLang(l))))}
       </Box>
     )
   })
