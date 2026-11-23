@@ -1,8 +1,9 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Effort, Lang, Mode, Route, Saved, Tier } from '../types'
+import type { Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
 import { LANGS, LANG_NAME, STRINGS, langFromSetting } from './i18n'
+import { LOOK, PALETTES, SWATCH } from './palettes'
 
 // Enrutador de modelo y esfuerzo para Claude Code, según "Which Claude model should
 // you build with?" (Anthropic, nov 2026). Todo es POR CONVERSACIÓN: cada una guarda
@@ -20,6 +21,7 @@ const modeAtom = atom({ plugin: 'model-router', key: 'mode' } as const, 'off')
 const langAtom = atom({ plugin: 'model-router', key: 'lang' } as const, 'en')
 const hiddenAtom = atom({ plugin: 'model-router', key: 'isHidden' } as const, false)
 const menuAtom = atom({ plugin: 'model-router', key: 'isMenuOpen' } as const, false)
+const paletteAtom = atom({ plugin: 'model-router', key: 'palette' } as const, null)
 const ctxAtom = atom({ plugin: 'model-router', key: 'ctx' } as const, 0)
 const lastModelAtom = atom({ plugin: 'model-router', key: 'lastModel' } as const, null)
 
@@ -121,6 +123,14 @@ async function current($: EngineInterface): Promise<Tier | null> {
   return (await read($, routeAtom))?.model ?? tierOf(await read($, lastModelAtom))
 }
 
+/** Pone la paleta (o vuelve a la de la app con null) y la recuerda para todas las conversaciones. */
+async function setPalette($: EngineInterface, p: Palette | null) {
+  await update($, paletteAtom, () => p)
+  await $.store.set('palette', p)
+  if (p) await $.theme.set(LOOK[p])
+  else await $.theme.clear()
+}
+
 async function setMode($: EngineInterface, m: Mode) {
   const before = await read($, modeAtom)
   const route = await read($, routeAtom)
@@ -167,6 +177,16 @@ export const register: Register = on => {
       }
     }
     await update($, langAtom, () => lang)
+    const palette = await $.store.get('palette')
+    if (PALETTES.includes(palette as Palette)) {
+      await update($, paletteAtom, () => palette as Palette)
+      // Sin pantalla que pinte temas (terminal) simplemente no se dibuja; no es un error.
+      try {
+        await $.theme.set(LOOK[palette as Palette])
+      } catch {
+        // nada
+      }
+    }
     await $.command.register({
       name: 'modelo',
       description: 'model-router: auto | sugerir | off | opus high | libre | idioma es|en|de|fr',
@@ -357,6 +377,14 @@ export const register: Register = on => {
       const note = await pin($, tier, effort)
       $.ui.toast((await t($)).toastPin(LABEL[tier], effort, note))
     }
+    const palette = await read($, paletteAtom)
+    // Pulsar la paleta activa vuelve a los colores de la app.
+    const onPalette = async (p: Palette) => {
+      const str = await t($)
+      const chosen = (await read($, paletteAtom)) === p ? null : p
+      await setPalette($, chosen)
+      $.ui.toast(chosen ? str.palette[chosen] : str.paletteOff)
+    }
     const onLang = async (l: Lang) => {
       await setLang($, l)
       $.ui.toast(STRINGS[l].toastLang)
@@ -384,7 +412,31 @@ export const register: Register = on => {
       <Box flexDirection="column" rowGap={1} paddingX={1}>
         <Box justifyContent="space-between" alignItems="center">
           <Text bold>↯ {s.title}</Text>
-          <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+          <Box alignItems="center" columnGap={1}>
+            {/* Botón redondo en cuatro cuartos: claro · oscuro / crema clara · crema oscura */}
+            <Box borderStyle="round" flexDirection="column">
+              {[PALETTES.slice(0, 2), PALETTES.slice(2)].map((pair, i) => (
+                <Box key={`router-palette-row-${i}`}>
+                  {pair.map(p => (
+                    <Button
+                      key={`router-palette-${p}`}
+                      plain
+                      label={palette === p ? `${s.palette[p]} ✓ · ${s.paletteOff}` : s.palette[p]}
+                      onPress={() => onPalette(p)}
+                    >
+                      <Text
+                        backgroundColor={SWATCH[p]}
+                        color={p === 'dark' || p === 'creamDark' ? '#f2e6cf' : '#2b2219'}
+                      >
+                        {palette === p ? ' ✓ ' : '   '}
+                      </Text>
+                    </Button>
+                  ))}
+                </Box>
+              ))}
+            </Box>
+            <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+          </Box>
         </Box>
         {row(s.modeRow, modes.map(m => opt(`router-${m}`, s.mode[m], !pinned && mode === m, () => onMode(m))))}
         {row(s.pinRow, TIERS.map(tier => opt(`router-pin:${tier}`, SHORT[tier], pinned === tier, () => onPin(tier))))}

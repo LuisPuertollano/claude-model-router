@@ -1,4 +1,4 @@
-import type { Lang, Mode } from '../types'
+import type { Lang, Mode, Palette } from '../types'
 
 export const LANGS: readonly Lang[] = ['es', 'en', 'de', 'fr']
 
@@ -12,6 +12,8 @@ export const LANG_NAME: Record<Lang, string> = {
 
 export type Strings = {
   modelLabel: string
+  palette: Record<Palette, string>
+  paletteOff: string
   router: string
   title: string
   modeRow: string
@@ -39,6 +41,8 @@ export type Strings = {
 
 const es: Strings = {
   modelLabel: 'Modelo',
+  palette: { light: 'Claro', dark: 'Oscuro', cream: 'Crema clara', creamDark: 'Crema oscura' },
+  paletteOff: 'Colores de la app',
   router: 'Enrutador',
   title: 'Enrutador de modelo · solo esta conversación',
   modeRow: 'Modo',
@@ -80,6 +84,8 @@ const es: Strings = {
 
 const en: Strings = {
   modelLabel: 'Model',
+  palette: { light: 'Light', dark: 'Dark', cream: 'Light cream', creamDark: 'Dark cream' },
+  paletteOff: 'App colours',
   router: 'Router',
   title: 'Model router · this conversation only',
   modeRow: 'Mode',
@@ -121,6 +127,8 @@ const en: Strings = {
 
 const de: Strings = {
   modelLabel: 'Modell',
+  palette: { light: 'Hell', dark: 'Dunkel', cream: 'Creme hell', creamDark: 'Creme dunkel' },
+  paletteOff: 'Farben der App',
   router: 'Router',
   title: 'Modell-Router · nur diese Unterhaltung',
   modeRow: 'Modus',
@@ -162,6 +170,8 @@ const de: Strings = {
 
 const fr: Strings = {
   modelLabel: 'Modèle',
+  palette: { light: 'Clair', dark: 'Sombre', cream: 'Crème clair', creamDark: 'Crème foncé' },
+  paletteOff: 'Couleurs de l’app',
   router: 'Routeur',
   title: 'Routeur de modèle · cette conversation',
   modeRow: 'Mode',

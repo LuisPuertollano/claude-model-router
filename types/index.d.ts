@@ -2,6 +2,8 @@ export type Tier = 'haiku' | 'sonnet' | 'opus' | 'fable'
 export type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 export type Mode = 'auto' | 'sugerir' | 'off'
 export type Lang = 'es' | 'en' | 'de' | 'fr'
+/** Paleta de colores de la app: claro, oscuro, crema clara, crema oscura. */
+export type Palette = 'light' | 'dark' | 'cream' | 'creamDark'
 
 export type Route = {
   model: Tier
@@ -25,6 +27,8 @@ declare module 'claude-code' {
       isHidden: boolean
       /** Menú de opciones abierto encima del cuadro de texto. */
       isMenuOpen: boolean
+      /** Paleta elegida en el botón redondo; null = la de la app. Global, como el idioma. */
+      palette: Palette | null
       /** Tokens de contexto de la última petición del hilo principal. */
       ctx: number
       /** Modelo que respondió la última petición del hilo principal. */

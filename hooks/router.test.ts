@@ -17,6 +17,14 @@ const engine = (on: any, saved: Record<string, unknown> = {}, language?: string)
     return { value: undefined }
   })
   on('command.register', () => ({ value: { command: 'modelo' } }))
+  on('theme.set', (_: unknown, e: any) => {
+    store['__theme'] = e
+    return { value: { isDrawn: true, requestId: 't1' } }
+  })
+  on('theme.clear', () => {
+    store['__theme'] = null
+    return { value: { isDrawn: false, reason: 'cleared' } }
+  })
   on('session.start', (_: unknown, e: any) => ({ cwd: e.cwd }))
   on('ui.render', ($: any, e: any) => {
     const { Text } = $.ui.resolve(e)
@@ -118,4 +126,33 @@ test('el botón del pie y su menú cambian el modo de la conversación y el idio
 
   const status = await run($, '')
   expect(status.text).toContain('diese Unterhaltung')
+})
+
+test('el botón redondo pone la paleta, la recuerda y al repetirla vuelve a la de la app', async ($, on) => {
+  const store = engine(on)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const foot = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
+  await foot.press({ key: 'router-menu' })
+  const menu = await $.ui.mount({ ...MENU, surface: 'desktop' } as any)
+
+  await menu.press({ key: 'router-palette-cream' })
+  expect(store['palette']).toBe('cream')
+  expect((store['__theme'] as any).colors).toBeDefined()
+
+  await menu.press({ key: 'router-palette-dark' })
+  expect(store['palette']).toBe('dark')
+  expect((store['__theme'] as any).overrideColorScheme).toBe('dark')
+
+  await menu.press({ key: 'router-palette-dark' })
+  expect(store['palette']).toBe(null)
+  expect(store['__theme']).toBe(null)
+  await menu.unmount()
+  await foot.unmount()
+})
+
+test('una conversación nueva recupera la paleta guardada', async ($, on) => {
+  const store = engine(on, { palette: 'creamDark' })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  expect((store['__theme'] as any).overrideColorScheme).toBe('dark')
+  expect((store['__theme'] as any).colors).toBeDefined()
 })

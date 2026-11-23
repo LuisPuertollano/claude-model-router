@@ -49,6 +49,7 @@ Nutze zu Beginn jeder neuen Aufgabe den Skill model-advisor, um mir in einer Zei
 | Modus: *Auto* | Wählt bei der ersten Nachricht; danach nur Vorschläge nach oben, mit Kosten. |
 | Fixieren: *Opus…* | Fixiert dieses Modell in dieser Unterhaltung. |
 | Aufwand: *low … max* | Ändert den Aufwand; gleiches Modell, also keine Neuverarbeitung. |
+| ◐ runder Knopf (oben rechts) | Farben der App: hell, dunkel, Creme hell oder Creme dunkel; die aktive erneut drücken stellt die der App wieder her. Alle Unterhaltungen. |
 | Sprache: *ES · EN · DE · FR* | Sprache der Mod (alle Unterhaltungen). |
 | `/modelo opus high` | Fixiert Modell und Aufwand. |
 | `/modelo libre` | Zurück zum Modell der App. |
