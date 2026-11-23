@@ -4,6 +4,10 @@ import type { Palette } from '../types'
  *  Se pintan como fondo de una caja: la app no colorea el texto de los botones. */
 export const DOT: Record<Palette, string> = { light: '#f4f2ec', dark: '#6e6e6e', cream: '#e8d3a8', creamDark: '#a5794f' }
 
+/** Media anchura (en celdas) de cada fila del botón redondo, de arriba abajo.
+ *  Una celda es el doble de alta que de ancha, así que esto dibuja un círculo. */
+export const DISC: readonly number[] = [3, 5, 6, 6, 5, 3]
+
 export const PALETTES: readonly Palette[] = ['light', 'dark', 'cream', 'creamDark']
 
 /** Colores del menú del enrutador. Solo pintan el menú; el resto de la app no cambia. */
