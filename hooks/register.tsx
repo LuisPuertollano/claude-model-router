@@ -403,6 +403,11 @@ export const register: Register = on => {
     )
     // La app de escritorio dibuja el texto de cada botón con su propio color (oscuro):
     // con paleta, cada opción va sobre una pastilla clara (fondo de Box, que sí respeta).
+    /** Etiqueta que llena el rectángulo de punta a punta (espacios duros), con ✓ en el centro si es la paleta activa. */
+    const swatchLabel = (isOn: boolean) => {
+      const mid = Math.floor((SWATCH - 1) / 2)
+      return ' '.repeat(mid) + (isOn ? '✓' : ' ') + ' '.repeat(SWATCH - 1 - mid)
+    }
     const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => {
       const text = isOn ? `✓ ${label}` : label
       return C ? (
@@ -428,20 +433,12 @@ export const register: Register = on => {
           </Text>
           <Box alignItems="center" columnGap={1}>
             {/* Selector de paleta: cuatro rectángulos iguales en fila (claro · oscuro · crema clara · crema oscura) */}
-            <Box alignItems="center" columnGap={1}>
+            {/* Sin borde: el botón ocupa el rectángulo entero, así que al pasar el ratón se marca entero.
+                La bandeja del color tenue hace de marco entre y alrededor de los rectángulos. */}
+            <Box alignItems="center" columnGap={1} paddingX={1} backgroundColor={C?.dim ?? '#77746c'}>
               {PALETTES.map(p => (
-                // El botón se estira a todo el rectángulo: al pasar el ratón se marca entero.
-                <Box
-                  key={`router-palette-${p}-chip`}
-                  width={SWATCH}
-                  overflow="hidden"
-                  flexDirection="column"
-                  alignItems="stretch"
-                  backgroundColor={DOT[p]}
-                  borderStyle="single"
-                  borderColor={C?.dim ?? '#77746c'}
-                >
-                  <Button key={`router-palette-${p}`} plain label={palette === p ? '✓' : ' '} onPress={() => onPalette(p)} />
+                <Box key={`router-palette-${p}-chip`} width={SWATCH} height={1} overflow="hidden" backgroundColor={DOT[p]}>
+                  <Button key={`router-palette-${p}`} plain label={swatchLabel(palette === p)} onPress={() => onPalette(p)} />
                 </Box>
               ))}
             </Box>
