@@ -1,6 +1,4 @@
-import type { ThemeSetArgs } from 'claude-code'
 import type { Palette } from '../types'
-import { makeColors } from './make-colors.js'
 
 /** Muestra de cada paleta en el botón redondo (un cuarto por paleta). */
 export const SWATCH: Record<Palette, string> = {
@@ -12,54 +10,33 @@ export const SWATCH: Record<Palette, string> = {
 
 export const PALETTES: readonly Palette[] = ['light', 'dark', 'cream', 'creamDark']
 
-const ROLES = { accent: '#9a5b2e', danger: '#b3392f', success: '#4e7d3a', warning: '#a86f14', pro: '#6d4f94' }
-
-const creamLight = makeColors({
-  label: 'Crema clara',
-  id: 'model-router-cream',
-  only: 'light',
-  roles: ROLES,
-  light: {
-    gray: {
-      anchors: {
-        'surface-0': '#efe4cc',
-        'surface-1': '#f5ecd9',
-        'surface-2': '#faf4e6',
-        'surface-3': '#faf4e6',
-        'text-primary': '#2b2219',
-        'text-secondary': '#54473a',
-        'text-muted': '#6b5d4c',
-      },
-    },
-  },
-})
-
-const creamDark = makeColors({
-  label: 'Crema oscura',
-  id: 'model-router-cream-dark',
-  only: 'dark',
-  roles: ROLES,
-  dark: {
-    gray: {
-      anchors: {
-        'surface-0': '#241c14',
-        'surface-1': '#2d241a',
-        'surface-2': '#362b20',
-        'surface-3': '#3b2f22',
-        'text-primary': '#f2e6cf',
-        'text-secondary': '#d6c7ad',
-        'text-muted': '#b3a389',
-      },
-    },
-  },
-})
-
-/** Lo que se manda a $.theme.set para cada paleta. */
-export const LOOK: Record<Palette, ThemeSetArgs> = {
-  light: { overrideColorScheme: 'light' },
-  dark: { overrideColorScheme: 'dark' },
-  cream: { colors: creamLight.theme, overrideColorScheme: 'light' },
-  creamDark: { colors: creamDark.theme, overrideColorScheme: 'dark' },
+/** Colores del menú del enrutador. Solo pintan el menú; el resto de la app no cambia. */
+export type MenuColors = {
+  bg: string
+  border: string
+  text: string
+  dim: string
+  chip: string
+  chipText: string
+  on: string
+  onText: string
 }
 
-export const PROBLEMS = [...creamLight.problems, ...creamDark.problems]
+export const MENU: Record<Palette, MenuColors> = {
+  light: {
+    bg: '#ffffff', border: '#d9d6cf', text: '#2b2a27', dim: '#77746c',
+    chip: '#efede8', chipText: '#2b2a27', on: '#2b2a27', onText: '#ffffff',
+  },
+  dark: {
+    bg: '#1e1e1e', border: '#3a3a3a', text: '#f0efe9', dim: '#a3a19a',
+    chip: '#2e2e2e', chipText: '#f0efe9', on: '#f0efe9', onText: '#1e1e1e',
+  },
+  cream: {
+    bg: '#f5ecd9', border: '#d9c9a8', text: '#2b2219', dim: '#6b5d4c',
+    chip: '#ebdfc4', chipText: '#2b2219', on: '#9a5b2e', onText: '#fff8ea',
+  },
+  creamDark: {
+    bg: '#2d241a', border: '#4a3b2b', text: '#f2e6cf', dim: '#b3a389',
+    chip: '#3b2f22', chipText: '#f2e6cf', on: '#e0b878', onText: '#2d241a',
+  },
+}

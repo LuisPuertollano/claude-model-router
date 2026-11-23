@@ -128,7 +128,7 @@ test('el botón del pie y su menú cambian el modo de la conversación y el idio
   expect(status.text).toContain('diese Unterhaltung')
 })
 
-test('el botón redondo pone la paleta, la recuerda y al repetirla vuelve a la de la app', async ($, on) => {
+test('el botón redondo cambia solo los colores del menú y al repetirla vuelve a los de la app', async ($, on) => {
   const store = engine(on)
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   const foot = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
@@ -137,22 +137,22 @@ test('el botón redondo pone la paleta, la recuerda y al repetirla vuelve a la d
 
   await menu.press({ key: 'router-palette-cream' })
   expect(store['palette']).toBe('cream')
-  expect((store['__theme'] as any).colors).toBeDefined()
+  expect(store['__theme']).toBeUndefined() // la app no cambia de tema
+  await menu.press({ key: 'router-auto' }) // las opciones siguen funcionando con paleta
+  expect((store['conv:conv-A'] as any).mode).toBe('auto')
 
-  await menu.press({ key: 'router-palette-dark' })
-  expect(store['palette']).toBe('dark')
-  expect((store['__theme'] as any).overrideColorScheme).toBe('dark')
-
-  await menu.press({ key: 'router-palette-dark' })
+  await menu.press({ key: 'router-palette-cream' })
   expect(store['palette']).toBe(null)
-  expect(store['__theme']).toBe(null)
   await menu.unmount()
   await foot.unmount()
 })
 
-test('una conversación nueva recupera la paleta guardada', async ($, on) => {
+test('deshace una vez el tema que la 0.6.0 puso en toda la app', async ($, on) => {
   const store = engine(on, { palette: 'creamDark' })
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
-  expect((store['__theme'] as any).overrideColorScheme).toBe('dark')
-  expect((store['__theme'] as any).colors).toBeDefined()
+  expect(store['__theme']).toBe(null)
+  expect(store['themeUndone']).toBe(true)
+  store['__theme'] = 'otro'
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  expect(store['__theme']).toBe('otro') // la segunda vez ya no toca el tema
 })

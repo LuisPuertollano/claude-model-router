@@ -3,7 +3,7 @@ import type { EngineInterface, Register } from 'claude-code'
 
 import type { Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
 import { LANGS, LANG_NAME, STRINGS, langFromSetting } from './i18n'
-import { LOOK, PALETTES, SWATCH } from './palettes'
+import { MENU, PALETTES, SWATCH } from './palettes'
 
 // Enrutador de modelo y esfuerzo para Claude Code, según "Which Claude model should
 // you build with?" (Anthropic, nov 2026). Todo es POR CONVERSACIÓN: cada una guarda
@@ -127,8 +127,6 @@ async function current($: EngineInterface): Promise<Tier | null> {
 async function setPalette($: EngineInterface, p: Palette | null) {
   await update($, paletteAtom, () => p)
   await $.store.set('palette', p)
-  if (p) await $.theme.set(LOOK[p])
-  else await $.theme.clear()
 }
 
 async function setMode($: EngineInterface, m: Mode) {
@@ -178,13 +176,16 @@ export const register: Register = on => {
     }
     await update($, langAtom, () => lang)
     const palette = await $.store.get('palette')
-    if (PALETTES.includes(palette as Palette)) {
-      await update($, paletteAtom, () => palette as Palette)
-      // Sin pantalla que pinte temas (terminal) simplemente no se dibuja; no es un error.
-      try {
-        await $.theme.set(LOOK[palette as Palette])
-      } catch {
-        // nada
+    if (PALETTES.includes(palette as Palette)) await update($, paletteAtom, () => palette as Palette)
+    // La 0.6.0 pintaba la paleta en toda la app con $.theme.set. Se deshace una vez.
+    if ((await $.store.get('themeUndone')) !== true) {
+      await $.store.set('themeUndone', true)
+      if (palette) {
+        try {
+          await $.theme.clear()
+        } catch {
+          // Sin pantalla que pinte temas (terminal): no había nada que deshacer.
+        }
       }
     }
     await $.command.register({
@@ -390,28 +391,41 @@ export const register: Register = on => {
       $.ui.toast(STRINGS[l].toastLang)
     }
 
+    // Con paleta elegida, el menú se pinta con sus colores; sin ella, con los de la app.
+    const C = palette ? MENU[palette] : null
     const row = (label: string, children: JSX.Element[]) => (
       <Box alignItems="center" columnGap={1}>
         <Box width={10}>
-          <Text dimColor>{label}</Text>
+          {C ? <Text color={C.dim}>{label}</Text> : <Text dimColor>{label}</Text>}
         </Box>
         {children}
       </Box>
     )
-    const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => (
-      <Button
-        key={key}
-        label={isOn ? `✓ ${label}` : label}
-        variant={isOn ? 'primary' : 'secondary'}
-        onPress={onPress}
-      />
-    )
+    const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => {
+      const text = isOn ? `✓ ${label}` : label
+      return C ? (
+        <Button key={key} plain label={text} onPress={onPress}>
+          <Text backgroundColor={isOn ? C.on : C.chip} color={isOn ? C.onText : C.chipText} bold={isOn}>
+            {` ${text} `}
+          </Text>
+        </Button>
+      ) : (
+        <Button key={key} label={text} variant={isOn ? 'primary' : 'secondary'} onPress={onPress} />
+      )
+    }
     const modes: Mode[] = ['off', 'sugerir', 'auto']
     const efforts: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max']
     return (
-      <Box flexDirection="column" rowGap={1} paddingX={1}>
+      <Box
+        flexDirection="column"
+        rowGap={1}
+        paddingX={1}
+        {...(C ? { backgroundColor: C.bg, borderStyle: 'round', borderColor: C.border } : {})}
+      >
         <Box justifyContent="space-between" alignItems="center">
-          <Text bold>↯ {s.title}</Text>
+          <Text bold color={C?.text}>
+            ↯ {s.title}
+          </Text>
           <Box alignItems="center" columnGap={1}>
             {/* Botón redondo en cuatro cuartos: claro · oscuro / crema clara · crema oscura */}
             <Box borderStyle="round" flexDirection="column">
