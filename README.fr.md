@@ -48,14 +48,16 @@ Au début de chaque nouvelle tâche, utilise la skill model-advisor pour me dire
 | Mode : *Suggérer* | Montre la suggestion ; rien ne change sans *Changer*. |
 | Mode : *Auto* | Choisit au premier message ; ensuite ne suggère que de monter, avec le coût. |
 | Fixer : *Opus…* | Fixe ce modèle dans cette conversation. |
-| Effort : *low … max* | Change l’effort ; même modèle, donc pas de retraitement. |
-| Palette : ▭ ▭ ▭ ▭ ▭ ▭ (six pastilles à côté du titre) | Couleurs du seul menu du routeur, pas du reste de l’app : clair, sombre, crème clair, crème foncé, vert sauge ou bleu nuit. L’active porte un ✓ ; appuyer à nouveau revient aux couleurs de l’app. Vaut pour toutes les conversations. |
+| Effort : *low … max* | Change seulement l’effort. Avec un modèle choisi, il le garde (pas de retraitement) ; sans modèle, rien n’est fixé et l’effort s’applique au modèle de l’app. `/modelo high` fait de même. |
+| Palette : ▭ ▭ ▭ ▭ ▭ ▭ (six pastilles à côté du titre) | Couleurs du seul menu du routeur, pas du reste de l’app : du plus clair au plus foncé : clair, crème clair, vert sauge, crème foncé, sombre ou bleu nuit. L’active porte un ✓ ; appuyer à nouveau revient aux couleurs de l’app. Vaut pour toutes les conversations. |
 | Langue : *ES · EN · DE · FR* | Langue du mod (toutes les conversations). |
 | `/modelo opus high` | Fixe modèle et effort. |
 | `/modelo libre` | Revient au modèle de l’app. |
 | `/modelo idioma fr` | Change la langue. |
 
 Un point (•) sur le bouton signale une suggestion en attente. La langue du mod part du réglage `language` de Claude Code.
+
+L’arbre de décision complet, avec schémas : [DECISION-TREE.md](DECISION-TREE.md#français). Les modèles que ton compte ne peut pas utiliser (Fable, par exemple) sont détectés une fois et remplacés par le suivant en dessous.
 
 ## Coût
 

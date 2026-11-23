@@ -48,14 +48,16 @@ Al empezar cada tarea nueva, usa la skill model-advisor para decirme en una lín
 | Modo: *Sugerir* | Muestra la sugerencia; nada cambia hasta que pulses *Cambiar*. |
 | Modo: *Auto* | Elige en el primer mensaje; después solo sugiere subir, con su coste. |
 | Fijar: *Opus…* | Fija ese modelo en esta conversación. |
-| Esfuerzo: *low … max* | Cambia el esfuerzo; mismo modelo, así que no reprocesa. |
-| Paleta: ▭ ▭ ▭ ▭ ▭ ▭ (seis rectángulos junto al título) | Colores solo del menú del enrutador, no del resto de la app: claro, oscuro, crema clara, crema oscura, verde salvia o azul noche. La activa lleva un ✓; pulsarla otra vez vuelve a los colores de la app. Vale para todas las conversaciones. |
+| Esfuerzo: *low … max* | Cambia solo el esfuerzo. Con un modelo elegido lo mantiene (no reprocesa); sin ninguno no fija nada y se aplica al modelo de la app. `/modelo high` hace lo mismo. |
+| Paleta: ▭ ▭ ▭ ▭ ▭ ▭ (seis rectángulos junto al título) | Colores solo del menú del enrutador, no del resto de la app: de más clara a más oscura: claro, crema clara, verde salvia, crema oscura, oscuro o azul noche. La activa lleva un ✓; pulsarla otra vez vuelve a los colores de la app. Vale para todas las conversaciones. |
 | Idioma: *ES · EN · DE · FR* | Idioma de la mod (todas las conversaciones). |
 | `/modelo opus high` | Fija modelo y esfuerzo. |
 | `/modelo libre` | Vuelve al modelo de la app. |
 | `/modelo idioma es` | Cambia el idioma. |
 
 Un punto (•) en el botón indica una sugerencia pendiente. El idioma de la mod parte del ajuste `language` de Claude Code.
+
+El árbol de decisiones completo, con diagramas: [DECISION-TREE.md](DECISION-TREE.md#español). Los modelos que tu cuenta no puede usar (Fable, por ejemplo) se detectan una vez y se sustituyen por el siguiente hacia abajo.
 
 ## Coste
 

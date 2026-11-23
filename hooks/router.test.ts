@@ -75,6 +75,7 @@ test('el modo se guarda solo para esta conversación', async ($, on) => {
   expect(store['conv:conv-A']).toEqual({
     mode: 'auto',
     route: { model: 'sonnet', effort: 'high', reason: '', isPinned: true },
+    effort: null,
   })
   expect(store['mode']).toBeUndefined()
 
@@ -128,7 +129,7 @@ test('el botón del pie y su menú cambian el modo de la conversación y el idio
   expect(status.text).toContain('diese Unterhaltung')
 })
 
-test('el botón redondo cambia solo los colores del menú y al repetirla vuelve a los de la app', async ($, on) => {
+test('el selector de paleta cambia solo los colores del menú y al repetirla vuelve a los de la app', async ($, on) => {
   const store = engine(on)
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   const foot = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
@@ -155,4 +156,36 @@ test('deshace una vez el tema que la 0.6.0 puso en toda la app', async ($, on) =
   store['__theme'] = 'otro'
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
   expect(store['__theme']).toBe('otro') // la segunda vez ya no toca el tema
+})
+
+test('el esfuerzo sin modelo fijado no fija ninguno', async ($, on) => {
+  const store = engine(on)
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const foot = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
+  await foot.press({ key: 'router-menu' })
+  const menu = await $.ui.mount({ ...MENU, surface: 'desktop' } as any)
+  await menu.press({ key: 'router-effort-high' })
+  expect((store['conv:conv-A'] as any).route).toBe(null)
+  expect((store['conv:conv-A'] as any).effort).toBe('high')
+  expect((store['conv:conv-A'] as any).mode).toBe('off')
+  await menu.unmount()
+  await foot.unmount()
+  expect((await run($, '')).text).toContain('high')
+})
+
+test('si la cuenta no tiene Fable, fijarlo usa Opus y lo recuerda', async ($, on) => {
+  const store = engine(on)
+  const asked: string[] = []
+  on('model.complete', (_: unknown, e: any) => {
+    asked.push(e.model)
+    return e.model === 'fable'
+      ? { value: { isAnswered: false, reason: 'api-error', status: 404, error: 'model_not_found', usage } }
+      : { value: { isAnswered: true, text: '.', usage } }
+  })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  await run($, 'fable high')
+  expect((store['conv:conv-A'] as any).route.model).toBe('opus')
+  expect((store['availability'] as any).fable.isOk).toBe(false)
+  await run($, 'fable')
+  expect(asked.filter(m => m === 'fable').length).toBe(1) // la segunda vez sale de lo recordado
 })

@@ -25,6 +25,8 @@ export type Strings = {
   toast: Record<Mode, string>
   toastPin: (model: string, effort: string, cost: string) => string
   toastLang: string
+  toastEffort: (effort: string) => string
+  unavailable: (wanted: string, used: string) => string
   offWarn: string
   subagent: (task: string, model: string) => string
   suggested: string
@@ -58,6 +60,8 @@ const es: Strings = {
   },
   toastPin: (m, e, c) => `Esta conversación queda en ${m} · ${e}${c ? ` (${c})` : ''}.`,
   toastLang: 'Idioma: español',
+  toastEffort: e => `Esfuerzo ${e}, con el modelo que elija la app.`,
+  unavailable: (w, u) => `${w} no está disponible en tu cuenta: uso ${u}.`,
   offWarn: 'Ojo: al apagar vuelve el modelo de la app y se reprocesa el contexto.',
   subagent: (d, m) => `Subagente «${d}» → ${m}`,
   suggested: 'Sugerido',
@@ -101,6 +105,8 @@ const en: Strings = {
   },
   toastPin: (m, e, c) => `This conversation now runs on ${m} · ${e}${c ? ` (${c})` : ''}.`,
   toastLang: 'Language: English',
+  toastEffort: e => `Effort ${e}, with whichever model the app picks.`,
+  unavailable: (w, u) => `${w} is not available on your account: using ${u}.`,
   offWarn: "Heads up: turning it off brings back the app's model and re-processes the context.",
   subagent: (d, m) => `Subagent “${d}” → ${m}`,
   suggested: 'Suggested',
@@ -144,6 +150,8 @@ const de: Strings = {
   },
   toastPin: (m, e, c) => `Diese Unterhaltung läuft jetzt auf ${m} · ${e}${c ? ` (${c})` : ''}.`,
   toastLang: 'Sprache: Deutsch',
+  toastEffort: e => `Aufwand ${e}, mit dem Modell, das die App wählt.`,
+  unavailable: (w, u) => `${w} ist für dein Konto nicht verfügbar: ich nehme ${u}.`,
   offWarn: 'Achtung: Ausschalten bringt das Modell der App zurück und verarbeitet den Kontext neu.',
   subagent: (d, m) => `Subagent „${d}“ → ${m}`,
   suggested: 'Vorschlag',
@@ -187,6 +195,8 @@ const fr: Strings = {
   },
   toastPin: (m, e, c) => `Cette conversation passe sur ${m} · ${e}${c ? ` (${c})` : ''}.`,
   toastLang: 'Langue : français',
+  toastEffort: e => `Effort ${e}, avec le modèle choisi par l’app.`,
+  unavailable: (w, u) => `${w} n’est pas disponible pour ton compte : j’utilise ${u}.`,
   offWarn: "Attention : désactiver rétablit le modèle de l'app et retraite le contexte.",
   subagent: (d, m) => `Sous-agent « ${d} » → ${m}`,
   suggested: 'Suggéré',

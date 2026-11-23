@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
+import type { Availability, Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
 import { LANGS, LANG_NAME, STRINGS, langFromSetting } from './i18n'
 import { DOT, MENU, PALETTES, SWATCH } from './palettes'
 
@@ -18,6 +18,7 @@ import { DOT, MENU, PALETTES, SWATCH } from './palettes'
 const routeAtom = atom({ plugin: 'model-router', key: 'route' } as const, null)
 const pendingAtom = atom({ plugin: 'model-router', key: 'pending' } as const, null)
 const modeAtom = atom({ plugin: 'model-router', key: 'mode' } as const, 'off')
+const effortAtom = atom({ plugin: 'model-router', key: 'effort' } as const, null)
 const langAtom = atom({ plugin: 'model-router', key: 'lang' } as const, 'en')
 const hiddenAtom = atom({ plugin: 'model-router', key: 'isHidden' } as const, false)
 const menuAtom = atom({ plugin: 'model-router', key: 'isMenuOpen' } as const, false)
@@ -100,7 +101,7 @@ async function keyOf($: EngineInterface) {
 }
 
 async function save($: EngineInterface) {
-  const s: Saved = { mode: await read($, modeAtom), route: await read($, routeAtom) }
+  const s: Saved = { mode: await read($, modeAtom), route: await read($, routeAtom), effort: await read($, effortAtom) }
   await $.store.set(await keyOf($), s)
 }
 
@@ -123,6 +124,50 @@ async function current($: EngineInterface): Promise<Tier | null> {
   return (await read($, routeAtom))?.model ?? tierOf(await read($, lastModelAtom))
 }
 
+// --- Modelos que la cuenta puede usar ---------------------------------------------
+// No hay forma de preguntar el plan; se prueba cada modelo con una petición mínima la primera
+// vez que hace falta y se recuerda (un acierto 7 días, un fallo 1 día). Haiku se da por bueno:
+// el clasificador ya lo usa.
+const OK_TTL = 7 * 24 * 3600_000
+const FAIL_TTL = 24 * 3600_000
+const HARD_ERRORS = new Set(['model_not_found', 'invalid_request', 'authentication_failed', 'billing_error'])
+
+async function isAvailable($: EngineInterface, tier: Tier): Promise<boolean> {
+  if (tier === 'haiku') return true
+  const raw = await $.store.get('availability')
+  const cache: Availability = typeof raw === 'object' && raw !== null ? (raw as Availability) : {}
+  const hit = cache[tier]
+  const now = Date.now()
+  if (hit && now - hit.at < (hit.isOk ? OK_TTL : FAIL_TTL)) return hit.isOk
+  let isOk = true
+  try {
+    const r = await $.model.complete({ model: tier, maxTokens: 1, timeoutMs: 8000, prompt: '.' })
+    // Solo un error que no se pasa solo cuenta como «no disponible»; saturación o red, no.
+    if (!r.isAnswered && r.reason === 'api-error' && HARD_ERRORS.has(r.error)) isOk = false
+  } catch {
+    // El motor rechaza el modelo (p. ej. fuera de la lista availableModels de la organización).
+    isOk = false
+  }
+  await $.store.set('availability', { ...cache, [tier]: { isOk, at: now } })
+  return isOk
+}
+
+/** El modelo pedido si la cuenta lo tiene; si no, el mejor de los de debajo. */
+async function usable($: EngineInterface, tier: Tier): Promise<Tier> {
+  for (let i = RANK[tier]; i > 0; i--) {
+    const cand = TIERS[i] as Tier
+    if (await isAvailable($, cand)) return cand
+  }
+  return 'haiku'
+}
+
+/** Si el modelo no está, avisa y devuelve el que se usará en su lugar. */
+async function usableWithNotice($: EngineInterface, tier: Tier): Promise<Tier> {
+  const got = await usable($, tier)
+  if (got !== tier) $.ui.toast((await t($)).unavailable(LABEL[tier], LABEL[got]))
+  return got
+}
+
 /** Pone la paleta (o vuelve a la de la app con null) y la recuerda para todas las conversaciones. */
 async function setPalette($: EngineInterface, p: Palette | null) {
   await update($, paletteAtom, () => p)
@@ -143,13 +188,31 @@ async function setMode($: EngineInterface, m: Mode) {
 }
 
 /** Fija modelo y esfuerzo en esta conversación; devuelve la nota de coste, si la hay. */
-async function pin($: EngineInterface, tier: Tier, effort: Effort) {
+async function pin($: EngineInterface, wanted: Tier, effort: Effort) {
+  const tier = await usableWithNotice($, wanted)
   const note = (await current($)) === tier ? '' : await costNote($, tier)
+  await update($, effortAtom, () => null)
   await update($, routeAtom, () => ({ model: tier, effort, reason: '', isPinned: true }))
   await update($, pendingAtom, () => null)
   if ((await read($, modeAtom)) === 'off') await update($, modeAtom, () => 'sugerir')
   await save($)
-  return note
+  return { tier, note }
+}
+
+/** Cambia solo el esfuerzo. Con un modelo elegido (fijado o del enrutador) lo mantiene; sin ninguno,
+ *  no fija nada: el esfuerzo se aplica al modelo que elija la app. */
+async function setEffort($: EngineInterface, effort: Effort) {
+  const route = await read($, routeAtom)
+  const mode = await read($, modeAtom)
+  const s = await t($)
+  if (route && mode !== 'off') {
+    await update($, routeAtom, () => ({ ...route, effort }))
+    await save($)
+    return route.isPinned ? s.toastPin(LABEL[route.model], effort, '') : s.toastEffort(effort)
+  }
+  await update($, effortAtom, () => effort)
+  await save($)
+  return s.toastEffort(effort)
 }
 
 async function setLang($: EngineInterface, lang: Lang) {
@@ -162,6 +225,9 @@ export const register: Register = on => {
     const saved = await $.store.get(await keyOf($))
     await update($, modeAtom, () => (isSaved(saved) ? saved.mode : 'off'))
     await update($, routeAtom, () => (isSaved(saved) ? saved.route : null))
+    await update($, effortAtom, () =>
+      isSaved(saved) && saved.effort && EFFORTS.includes(saved.effort) ? saved.effort : null,
+    )
     await update($, pendingAtom, () => null)
     const stored = await $.store.get('lang')
     let lang: Lang = 'en'
@@ -214,19 +280,26 @@ export const register: Register = on => {
     if (first === 'libre' || first === 'free') {
       await update($, routeAtom, () => null)
       await update($, pendingAtom, () => null)
+      await update($, effortAtom, () => null)
       await save($)
       return text((await t($)).cmdFreed)
+    }
+    if (EFFORTS.includes(first as Effort)) {
+      return text(await setEffort($, first as Effort))
     }
     if (TIERS.includes(first as Tier)) {
       const tier = first as Tier
       const effort: Effort = EFFORTS.includes(second as Effort) ? (second as Effort) : 'medium'
-      const note = await pin($, tier, effort)
-      return text((await t($)).cmdPinned(LABEL[tier], effort, note))
+      const r = await pin($, tier, effort)
+      return text((await t($)).cmdPinned(LABEL[r.tier], effort, r.note))
     }
     const s = await t($)
     const mode = await read($, modeAtom)
     const route = await read($, routeAtom)
-    const now = route ? `${LABEL[route.model]} · ${route.effort}${route.isPinned ? ' (pin)' : ''}` : s.appModel
+    const effort = await read($, effortAtom)
+    const now = route
+      ? `${LABEL[route.model]} · ${route.effort}${route.isPinned ? ' (pin)' : ''}`
+      : `${s.appModel}${effort ? ` · ${effort}` : ''}`
     return text(s.status(mode, now))
   })
 
@@ -248,7 +321,7 @@ export const register: Register = on => {
     })
     const c = r.isAnswered ? parse(r.text) : null
     if (!c || 'same' in c) return next(e)
-    const proposal: Route = { model: c.model, effort: c.effort, reason: c.reason, isPinned: false }
+    const proposal: Route = { model: await usable($, c.model), effort: c.effort, reason: c.reason, isPinned: false }
 
     if (await isFresh($)) {
       // Primer mensaje: todavía no hay caché, cambiar no cuesta nada extra.
@@ -277,7 +350,10 @@ export const register: Register = on => {
     if (e.agentId !== undefined) return yield* next(e)
     const route = await read($, routeAtom)
     const mode = await read($, modeAtom)
-    const res = yield* next(route && mode !== 'off' ? { ...e, model: route.model, effort: route.effort } : e)
+    const effort = await read($, effortAtom)
+    const res = yield* next(
+      route && mode !== 'off' ? { ...e, model: route.model, effort: route.effort } : effort ? { ...e, effort } : e,
+    )
     if (res.usage) {
       const u = res.usage
       const ctx = u.input_tokens + u.cache_read_input_tokens + u.cache_creation_input_tokens
@@ -310,6 +386,7 @@ export const register: Register = on => {
     const cap = await current($)
     if (cap && RANK[model] > RANK[cap]) model = cap
     if (model === 'fable') model = 'opus'
+    model = await usable($, model)
     $.ui.toast((await t($)).subagent(e.description, LABEL[model]))
     return next({ ...e, model: model as 'haiku' | 'sonnet' | 'opus' })
   }).catch(($, e, next) => next(e))
@@ -331,6 +408,8 @@ export const register: Register = on => {
           : route
             ? `${s.mode[mode]} · ${SHORT[route.model]} · ${route.effort}`
             : `${s.router} · ${s.mode[mode]}`
+    const effortOnly = await read($, effortAtom)
+    const label = (!route || mode === 'off') && effortOnly ? `${now} · ${effortOnly}` : now
     const dot = pending && mode !== 'off' ? ' •' : ''
     const engine = await next(e)
     return (
@@ -338,7 +417,7 @@ export const register: Register = on => {
         <Button
           key="router-menu"
           variant={isOpen ? 'primary' : 'secondary'}
-          label={`↯ ${now}${dot} ${isOpen ? '▴' : '▾'}`}
+          label={`↯ ${label}${dot} ${isOpen ? '▴' : '▾'}`}
           onPress={() => update($, menuAtom, v => !v)}
         />
         {engine}
@@ -355,6 +434,7 @@ export const register: Register = on => {
     const lang = await read($, langAtom)
     const { Box, Button, Text } = $.ui.resolve(e)
     const pinned = route?.isPinned && mode !== 'off' ? route.model : null
+    const activeEffort = route && mode !== 'off' ? route.effort : await read($, effortAtom)
     const close = () => update($, menuAtom, () => false)
 
     const onMode = async (m: Mode) => {
@@ -367,16 +447,13 @@ export const register: Register = on => {
     }
     const onPin = async (tier: Tier) => {
       const str = await t($)
-      const effort = (await read($, routeAtom))?.effort ?? 'medium'
-      const note = await pin($, tier, effort)
-      $.ui.toast(str.toastPin(LABEL[tier], effort, note))
+      const effort = (await read($, routeAtom))?.effort ?? (await read($, effortAtom)) ?? 'medium'
+      const r = await pin($, tier, effort)
+      $.ui.toast(str.toastPin(LABEL[r.tier], effort, r.note))
     }
     const onEffort = async (effort: Effort) => {
-      // Mismo modelo que ahora (el del enrutador o el último que respondió); solo cambia el esfuerzo,
-      // así que no reprocesa el contexto.
-      const tier = (await current($)) ?? 'opus'
-      const note = await pin($, tier, effort)
-      $.ui.toast((await t($)).toastPin(LABEL[tier], effort, note))
+      // Solo cambia el esfuerzo: nunca fija un modelo ni reprocesa el contexto.
+      $.ui.toast(await setEffort($, effort))
     }
     const palette = await read($, paletteAtom)
     // Pulsar la paleta activa vuelve a los colores de la app.
@@ -452,7 +529,7 @@ export const register: Register = on => {
         {row(s.pinRow, TIERS.map(tier => opt(`router-pin:${tier}`, SHORT[tier], pinned === tier, () => onPin(tier))))}
         {row(
           s.effortRow,
-          efforts.map(ef => opt(`router-effort-${ef}`, ef, mode !== 'off' && route?.effort === ef, () => onEffort(ef))),
+          efforts.map(ef => opt(`router-effort-${ef}`, ef, activeEffort === ef, () => onEffort(ef))),
         )}
         {row(s.langLabel, LANGS.map(l => opt(`router-lang-${l}`, l.toUpperCase(), l === lang, () => onLang(l))))}
       </Box>

@@ -7,7 +7,8 @@ export const DOT: Record<Palette, string> = { light: '#ffffff', dark: '#6e6e6e',
 /** Ancho, en celdas, de cada rectángulo del selector de paleta. */
 export const SWATCH = 5
 
-export const PALETTES: readonly Palette[] = ['light', 'dark', 'cream', 'creamDark', 'sage', 'night']
+/** De más clara a más oscura (luminancia del color de cada rectángulo). */
+export const PALETTES: readonly Palette[] = ['light', 'cream', 'sage', 'creamDark', 'dark', 'night']
 
 /** Colores del menú del enrutador. Solo pintan el menú; el resto de la app no cambia. */
 export type MenuColors = {

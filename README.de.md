@@ -48,14 +48,16 @@ Nutze zu Beginn jeder neuen Aufgabe den Skill model-advisor, um mir in einer Zei
 | Modus: *Vorschlagen* | Zeigt den Vorschlag; nichts ändert sich ohne *Wechseln*. |
 | Modus: *Auto* | Wählt bei der ersten Nachricht; danach nur Vorschläge nach oben, mit Kosten. |
 | Fixieren: *Opus…* | Fixiert dieses Modell in dieser Unterhaltung. |
-| Aufwand: *low … max* | Ändert den Aufwand; gleiches Modell, also keine Neuverarbeitung. |
-| Palette: ▭ ▭ ▭ ▭ ▭ ▭ (sechs Farbfelder neben dem Titel) | Farben nur des Router-Menüs, nicht der übrigen App: hell, dunkel, Creme hell, Creme dunkel, Salbeigrün oder Nachtblau. Die aktive trägt ein ✓; erneut drücken stellt die Farben der App wieder her. Gilt für alle Unterhaltungen. |
+| Aufwand: *low … max* | Ändert nur den Aufwand. Mit gewähltem Modell bleibt es (keine Neuverarbeitung); ohne Modell wird nichts fixiert und der Aufwand gilt für das Modell der App. `/modelo high` tut dasselbe. |
+| Palette: ▭ ▭ ▭ ▭ ▭ ▭ (sechs Farbfelder neben dem Titel) | Farben nur des Router-Menüs, nicht der übrigen App: von hell nach dunkel: hell, Creme hell, Salbeigrün, Creme dunkel, dunkel oder Nachtblau. Die aktive trägt ein ✓; erneut drücken stellt die Farben der App wieder her. Gilt für alle Unterhaltungen. |
 | Sprache: *ES · EN · DE · FR* | Sprache der Mod (alle Unterhaltungen). |
 | `/modelo opus high` | Fixiert Modell und Aufwand. |
 | `/modelo libre` | Zurück zum Modell der App. |
 | `/modelo idioma de` | Ändert die Sprache. |
 
 Ein Punkt (•) auf dem Knopf zeigt einen offenen Vorschlag. Die Sprache der Mod richtet sich zunächst nach der Einstellung `language` von Claude Code.
+
+Der vollständige Entscheidungsbaum mit Diagrammen: [DECISION-TREE.md](DECISION-TREE.md#deutsch). Modelle, die dein Konto nicht nutzen kann (etwa Fable), werden einmal erkannt und durch das nächstniedrigere ersetzt.
 
 ## Kosten
 

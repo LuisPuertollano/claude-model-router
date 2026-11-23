@@ -48,14 +48,16 @@ At the start of each new task, use the model-advisor skill to tell me in one lin
 | Mode: *Suggest* | Shows the suggestion; nothing changes until you press *Switch*. |
 | Mode: *Auto* | Picks on the first message; afterwards only suggests upgrades, with their cost. |
 | Pin: *Opus…* | Pins that model in this conversation. |
-| Effort: *low … max* | Sets the effort; same model, so no re-processing. |
-| Palette: ▭ ▭ ▭ ▭ ▭ ▭ (six swatches beside the title) | Colours of the router's menu only, not the rest of the app: light, dark, light cream, dark cream, sage green or night blue. The active one shows a ✓; press it again to go back to the app's colours. Applies to all conversations. |
+| Effort: *low … max* | Sets the effort only. With a model chosen it keeps that model (no re-processing); with none it pins nothing and applies to the app's model. `/modelo high` does the same. |
+| Palette: ▭ ▭ ▭ ▭ ▭ ▭ (six swatches beside the title) | Colours of the router's menu only, not the rest of the app: from lightest to darkest: light, light cream, sage green, dark cream, dark or night blue. The active one shows a ✓; press it again to go back to the app's colours. Applies to all conversations. |
 | Language: *ES · EN · DE · FR* | Language of the mod (all conversations). |
 | `/modelo opus high` | Pins model and effort. |
 | `/modelo libre` | Back to the app's model. |
 | `/modelo idioma de` | Changes the language. |
 
 A dot (•) on the button means a suggestion is waiting. The mod's language starts from Claude Code's `language` setting.
+
+The full decision tree, with diagrams: [DECISION-TREE.md](DECISION-TREE.md). Models your account cannot use (Fable, for instance) are detected once and replaced by the next one down.
 
 ## Cost
 
