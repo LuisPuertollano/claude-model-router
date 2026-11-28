@@ -38,6 +38,11 @@ export type Strings = {
   cmdPinned: (model: string, effort: string, cost: string) => string
   cmdLang: string
   appModel: string
+  savingsRow: string
+  savings: (usd: string, opusUsd: string, pct: number) => string
+  learned: (n: number) => string
+  forget: string
+  forgotten: string
   status: (mode: Mode, now: string) => string
 }
 
@@ -77,13 +82,19 @@ const es: Strings = {
   cmdFreed: 'model-router: modelo liberado en esta conversación; vuelve a mandar el de la app.',
   cmdPinned: (m, e, c) => `model-router: esta conversación queda en ${m} · ${e}${c ? ` (${c})` : ''}. /modelo libre para soltarlo.`,
   cmdLang: 'model-router: idioma cambiado a español.',
+  savingsRow: 'Gasto',
+  savings: (u, o, p) => `esta conversación $${u} · siempre con Opus $${o}${p > 0 ? ` · ahorras ${p}%` : p < 0 ? ` · ${-p}% más` : ''}`,
+  learned: n => `aprende de ${n} ${n === 1 ? 'decisión tuya' : 'decisiones tuyas'}`,
+  forget: 'Olvidar',
+  forgotten: 'model-router: he olvidado tus decisiones; el enrutador vuelve a seguir solo la guía.',
   appModel: 'el de la app',
   status: (mode, now) =>
     `model-router · esta conversación · modo ${mode} · modelo: ${now}\n` +
     '/modelo auto | sugerir | off   — modo (solo aquí)\n' +
     '/modelo opus high              — fija modelo y esfuerzo aquí\n' +
     '/modelo libre                  — vuelve al modelo de la app\n' +
-    '/modelo idioma es|en|de|fr     — idioma de la mod',
+    '/modelo idioma es|en|de|fr     — idioma de la mod' +
+    '\n/modelo olvidar                — olvida tus decisiones aprendidas',
 }
 
 const en: Strings = {
@@ -122,13 +133,19 @@ const en: Strings = {
   cmdFreed: "model-router: model released in this conversation; the app's model is used again.",
   cmdPinned: (m, e, c) => `model-router: this conversation now runs on ${m} · ${e}${c ? ` (${c})` : ''}. /modelo libre to release it.`,
   cmdLang: 'model-router: language set to English.',
+  savingsRow: 'Spend',
+  savings: (u, o, p) => `this conversation $${u} · always Opus $${o}${p > 0 ? ` · you save ${p}%` : p < 0 ? ` · ${-p}% more` : ''}`,
+  learned: n => `learns from ${n} ${n === 1 ? 'decision' : 'decisions'} of yours`,
+  forget: 'Forget',
+  forgotten: 'model-router: your decisions are forgotten; the router follows the guide alone again.',
   appModel: "the app's",
   status: (mode, now) =>
     `model-router · this conversation · mode ${mode} · model: ${now}\n` +
     '/modelo auto | sugerir | off   — mode (here only)\n' +
     '/modelo opus high              — pin model and effort here\n' +
     "/modelo libre                  — back to the app's model\n" +
-    '/modelo idioma es|en|de|fr     — language of the mod',
+    '/modelo idioma es|en|de|fr     — language of the mod' +
+    '\n/modelo olvidar                — forget your learned decisions',
 }
 
 const de: Strings = {
@@ -167,13 +184,19 @@ const de: Strings = {
   cmdFreed: 'model-router: Modell in dieser Unterhaltung freigegeben; es gilt wieder das der App.',
   cmdPinned: (m, e, c) => `model-router: diese Unterhaltung läuft jetzt auf ${m} · ${e}${c ? ` (${c})` : ''}. /modelo libre zum Freigeben.`,
   cmdLang: 'model-router: Sprache auf Deutsch gestellt.',
+  savingsRow: 'Kosten',
+  savings: (u, o, p) => `diese Unterhaltung $${u} · immer Opus $${o}${p > 0 ? ` · du sparst ${p}%` : p < 0 ? ` · ${-p}% mehr` : ''}`,
+  learned: n => `lernt aus ${n} ${n === 1 ? 'Entscheidung' : 'Entscheidungen'} von dir`,
+  forget: 'Vergessen',
+  forgotten: 'model-router: deine Entscheidungen sind vergessen; der Router folgt wieder nur dem Leitfaden.',
   appModel: 'das der App',
   status: (mode, now) =>
     `model-router · diese Unterhaltung · Modus ${mode} · Modell: ${now}\n` +
     '/modelo auto | sugerir | off   — Modus (nur hier)\n' +
     '/modelo opus high              — Modell und Aufwand hier fixieren\n' +
     '/modelo libre                  — zurück zum Modell der App\n' +
-    '/modelo idioma es|en|de|fr     — Sprache der Mod',
+    '/modelo idioma es|en|de|fr     — Sprache der Mod' +
+    '\n/modelo olvidar                — vergisst deine gelernten Entscheidungen',
 }
 
 const fr: Strings = {
@@ -212,13 +235,19 @@ const fr: Strings = {
   cmdFreed: "model-router : modèle libéré dans cette conversation ; celui de l'app reprend.",
   cmdPinned: (m, e, c) => `model-router : cette conversation passe sur ${m} · ${e}${c ? ` (${c})` : ''}. /modelo libre pour libérer.`,
   cmdLang: 'model-router : langue réglée sur le français.',
+  savingsRow: 'Coût',
+  savings: (u, o, p) => `cette conversation $${u} · toujours Opus $${o}${p > 0 ? ` · tu économises ${p}%` : p < 0 ? ` · ${-p}% de plus` : ''}`,
+  learned: n => `apprend de ${n} décision${n === 1 ? '' : 's'} de ta part`,
+  forget: 'Oublier',
+  forgotten: 'model-router : tes décisions sont oubliées ; le routeur suit de nouveau le guide seul.',
   appModel: "celui de l'app",
   status: (mode, now) =>
     `model-router · cette conversation · mode ${mode} · modèle : ${now}\n` +
     '/modelo auto | sugerir | off   — mode (ici seulement)\n' +
     '/modelo opus high              — fixer modèle et effort ici\n' +
     "/modelo libre                  — revenir au modèle de l'app\n" +
-    '/modelo idioma es|en|de|fr     — langue du mod',
+    '/modelo idioma es|en|de|fr     — langue du mod' +
+    '\n/modelo olvidar                — oublie tes décisions apprises',
 }
 
 export const STRINGS: Record<Lang, Strings> = { es, en, de, fr }

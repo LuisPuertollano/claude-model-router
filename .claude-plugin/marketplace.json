@@ -8,7 +8,7 @@
     {
       "name": "model-router",
       "source": "./",
-      "version": "0.7.1",
+      "version": "1.0.0",
       "description": "Picks Claude's model and effort per conversation (Claude Code footer menu, ES/EN/DE/FR) and advises in Chat and Cowork, following Anthropic's guide, without re-processing your context behind your back"
     }
   ]

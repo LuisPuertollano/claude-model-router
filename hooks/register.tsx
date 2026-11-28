@@ -1,9 +1,10 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Availability, Effort, Lang, Mode, Palette, Route, Saved, Tier } from '../types'
+import type { Availability, Decision, Effort, Lang, Mode, Palette, Route, Saved, Spend, Tier } from '../types'
 import { LANGS, LANG_NAME, STRINGS, langFromSetting } from './i18n'
 import { DOT, MENU, PALETTES, SWATCH } from './palettes'
+import { cacheWriteUsd, costUsd } from './prices'
 
 // Enrutador de modelo y esfuerzo para Claude Code, según "Which Claude model should
 // you build with?" (Anthropic, nov 2026). Todo es POR CONVERSACIÓN: cada una guarda
@@ -25,6 +26,9 @@ const menuAtom = atom({ plugin: 'model-router', key: 'isMenuOpen' } as const, fa
 const paletteAtom = atom({ plugin: 'model-router', key: 'palette' } as const, null)
 const ctxAtom = atom({ plugin: 'model-router', key: 'ctx' } as const, 0)
 const lastModelAtom = atom({ plugin: 'model-router', key: 'lastModel' } as const, null)
+const lastPromptAtom = atom({ plugin: 'model-router', key: 'lastPrompt' } as const, null)
+const spendAtom = atom({ plugin: 'model-router', key: 'spend' } as const, { usd: 0, opusUsd: 0 })
+const learnedAtom = atom({ plugin: 'model-router', key: 'learned' } as const, 0)
 
 const TIERS: readonly Tier[] = ['haiku', 'sonnet', 'opus', 'fable']
 const EFFORTS: readonly Effort[] = ['low', 'medium', 'high', 'xhigh', 'max']
@@ -88,21 +92,82 @@ const tierOf = (id: string | null): Tier | null =>
   (id?.toLowerCase().match(/haiku|sonnet|opus|fable/)?.[0] as Tier | undefined) ?? null
 
 const fmtK = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}K` : `${n}`)
-
-// Escribir en caché el contexto con el modelo nuevo (precio de escritura ≈ 1,25 × entrada).
-const cacheWriteUsd = (t: Tier, n: number) =>
-  (n / 1e6) * (t === 'haiku' ? (n > 100_000 ? 0.625 : 0.125) : { sonnet: 2.5, opus: 5, fable: 10 }[t])
+const fmtUsd = (n: number) => (n < 0.1 ? n.toFixed(3) : n.toFixed(2))
 
 const isSaved = (v: unknown): v is Saved =>
   typeof v === 'object' && v !== null && MODES.includes((v as Saved).mode)
+
+const isSpend = (v: unknown): v is Spend =>
+  typeof v === 'object' && v !== null && typeof (v as Spend).usd === 'number' && typeof (v as Spend).opusUsd === 'number'
 
 async function keyOf($: EngineInterface) {
   return `conv:${await $.session.id()}`
 }
 
 async function save($: EngineInterface) {
-  const s: Saved = { mode: await read($, modeAtom), route: await read($, routeAtom), effort: await read($, effortAtom) }
+  const s: Saved = {
+    mode: await read($, modeAtom),
+    route: await read($, routeAtom),
+    effort: await read($, effortAtom),
+    spend: await read($, spendAtom),
+  }
   await $.store.set(await keyOf($), s)
+}
+
+/** Suma un gasto real y lo que habría costado con Opus. */
+async function addSpend($: EngineInterface, usd: number, opusUsd: number) {
+  await update($, spendAtom, s => ({ usd: s.usd + usd, opusUsd: s.opusUsd + opusUsd }))
+}
+
+// --- Aprender de tus decisiones -----------------------------------------------------
+// Cuando corriges al enrutador (eliges otro modelo, o «Seguir igual» ante una sugerencia),
+// se guarda el comienzo del mensaje y lo que elegiste. Las últimas van como ejemplos al
+// clasificador, que las sigue cuando llega algo parecido. Solo se guardan en este equipo.
+const MAX_DECISIONS = 20
+const EXCERPT = 160
+
+async function decisions($: EngineInterface): Promise<Decision[]> {
+  const raw = await $.store.get('decisions')
+  return Array.isArray(raw) ? (raw as Decision[]).filter(d => TIERS.includes(d?.chosen) && TIERS.includes(d?.proposed)) : []
+}
+
+async function learn($: EngineInterface, proposed: Route, chosen: Tier, chosenEffort: Effort) {
+  const text = await read($, lastPromptAtom)
+  if (!text) return
+  if (proposed.model === chosen && proposed.effort === chosenEffort) return
+  const d: Decision = {
+    text: text.slice(0, EXCERPT),
+    proposed: proposed.model,
+    proposedEffort: proposed.effort,
+    chosen,
+    chosenEffort,
+    at: Date.now(),
+  }
+  const all = [...(await decisions($)).filter(x => x.text !== d.text), d].slice(-MAX_DECISIONS)
+  await $.store.set('decisions', all)
+  await update($, learnedAtom, () => all.length)
+}
+
+async function forget($: EngineInterface) {
+  await $.store.set('decisions', [])
+  await update($, learnedAtom, () => 0)
+}
+
+function examples(list: Decision[]): string {
+  if (list.length === 0) return ''
+  const lines = list.map(
+    d =>
+      `- "${d.text.replace(/\s+/g, ' ')}" → router said ${d.proposed} ${d.proposedEffort}; the user chose ${d.chosen} ${d.chosenEffort}`,
+  )
+  return `\n\nThis user's own corrections to past routing (oldest first). They show this user's goals. When a new message is similar to one of these, prefer what the user chose over the general guide:\n${lines.join('\n')}`
+}
+
+/** Lo que el enrutador había decidido o propuesto en esta conversación, si lo hay. */
+async function routerChoice($: EngineInterface): Promise<Route | null> {
+  const pending = await read($, pendingAtom)
+  if (pending) return pending
+  const route = await read($, routeAtom)
+  return route && !route.isPinned ? route : null
 }
 
 async function t($: EngineInterface) {
@@ -191,6 +256,9 @@ async function setMode($: EngineInterface, m: Mode) {
 async function pin($: EngineInterface, wanted: Tier, effort: Effort) {
   const tier = await usableWithNotice($, wanted)
   const note = (await current($)) === tier ? '' : await costNote($, tier)
+  // Fijar otro modelo después de que el enrutador eligiera o propusiera uno es una corrección: se aprende.
+  const rc = await routerChoice($)
+  if (rc && (await read($, modeAtom)) !== 'off') await learn($, rc, tier, effort)
   await update($, effortAtom, () => null)
   await update($, routeAtom, () => ({ model: tier, effort, reason: '', isPinned: true }))
   await update($, pendingAtom, () => null)
@@ -229,6 +297,9 @@ export const register: Register = on => {
       isSaved(saved) && saved.effort && EFFORTS.includes(saved.effort) ? saved.effort : null,
     )
     await update($, pendingAtom, () => null)
+    await update($, spendAtom, () => (isSaved(saved) && isSpend(saved.spend) ? saved.spend : { usd: 0, opusUsd: 0 }))
+    const learnedCount = (await decisions($)).length
+    await update($, learnedAtom, () => learnedCount)
     const stored = await $.store.get('lang')
     let lang: Lang = 'en'
     if (LANGS.includes(stored as Lang)) {
@@ -256,8 +327,8 @@ export const register: Register = on => {
     }
     await $.command.register({
       name: 'modelo',
-      description: 'model-router: auto | sugerir | off | opus high | libre | idioma es|en|de|fr',
-      argumentHint: '[auto|sugerir|off|libre|haiku|sonnet|opus|fable] [effort] | idioma <es|en|de|fr>',
+      description: 'model-router: auto | sugerir | off | opus high | libre | olvidar | idioma es|en|de|fr',
+      argumentHint: '[auto|sugerir|off|libre|olvidar|haiku|sonnet|opus|fable] [effort] | idioma <es|en|de|fr>',
     })
     return next(e)
   })
@@ -276,6 +347,10 @@ export const register: Register = on => {
     if (MODES.includes(first as Mode)) {
       await setMode($, first as Mode)
       return text((await t($)).cmdMode(first as Mode))
+    }
+    if (['olvidar', 'forget', 'vergessen', 'oublier'].includes(first)) {
+      await forget($)
+      return text((await t($)).forgotten)
     }
     if (first === 'libre' || first === 'free') {
       await update($, routeAtom, () => null)
@@ -316,14 +391,18 @@ export const register: Register = on => {
       effort: 'low',
       maxTokens: 200,
       timeoutMs: 8000,
-      system: RULES.replace('LANGUAGE', LANG_NAME[await read($, langAtom)]),
+      system: RULES.replace('LANGUAGE', LANG_NAME[await read($, langAtom)]) + examples(await decisions($)),
       prompt: `Current route: ${route ? `${route.model} ${route.effort}` : 'none'}\n\nUser message:\n<<<\n${e.text.slice(0, 6000)}\n>>>`,
     })
+    // El clasificador también cuesta: cuenta en el gasto (y no en «siempre Opus», que no lo usaría).
+    if (r.isAnswered) await addSpend($, costUsd('haiku', r.usage), 0)
     const c = r.isAnswered ? parse(r.text) : null
+    if (c && !('same' in c)) await update($, lastPromptAtom, () => e.text)
     if (!c || 'same' in c) return next(e)
-    const proposal: Route = { model: await usable($, c.model), effort: c.effort, reason: c.reason, isPinned: false }
+    const isFirst = await isFresh($)
+    const proposal: Route = { model: await usable($, c.model), effort: c.effort, reason: c.reason, isPinned: false, isFirst }
 
-    if (await isFresh($)) {
+    if (isFirst) {
       // Primer mensaje: todavía no hay caché, cambiar no cuesta nada extra.
       if (mode === 'auto') {
         await update($, routeAtom, () => proposal)
@@ -359,6 +438,11 @@ export const register: Register = on => {
       const ctx = u.input_tokens + u.cache_read_input_tokens + u.cache_creation_input_tokens
       await update($, ctxAtom, () => ctx)
       await update($, lastModelAtom, () => u.model)
+      const tier = tierOf(u.model)
+      if (tier) {
+        await addSpend($, costUsd(tier, u), costUsd('opus', u))
+        await save($)
+      }
     }
     return res
   })
@@ -482,16 +566,29 @@ export const register: Register = on => {
     // con paleta, cada opción va sobre una pastilla clara (fondo de Box, que sí respeta).
     /** Etiqueta que llena el rectángulo de punta a punta (espacios duros), con ✓ en el centro si es la paleta activa. */
     // Dos celdas menos que el rectángulo: el botón de la app añade su propio margen y, si no cabe, corta el ✓ en «…».
+    // El escritorio aún lo cortaba («…»): allí la etiqueta es un solo carácter, centrado en la caja.
     const swatchLabel = (isOn: boolean) => {
+      if (!isTerminal) return isOn ? '✓' : ' '
       const n = SWATCH - 2
       const mid = Math.floor((n - 1) / 2)
       return ' '.repeat(mid) + (isOn ? '✓' : ' ') + ' '.repeat(n - 1 - mid)
     }
+    // La terminal, en cambio, pinta el texto del botón con el color de su tema (claro sobre
+    // oscuro): sobre una pastilla clara no se leería. Allí el texto lleva el color de la paleta.
+    const isTerminal = e.surface === 'terminal'
+    const chipButton = (key: string, text: string, color: string, onPress: () => unknown) =>
+      isTerminal ? (
+        <Button key={key} plain label={text} onPress={onPress}>
+          <Text color={color}>{text}</Text>
+        </Button>
+      ) : (
+        <Button key={key} plain label={text} onPress={onPress} />
+      )
     const opt = (key: string, label: string, isOn: boolean, onPress: () => unknown) => {
       const text = isOn ? `✓ ${label}` : label
       return C ? (
         <Box key={`${key}-chip`} backgroundColor={isOn ? C.on : C.chip} paddingX={1}>
-          <Button key={key} plain label={text} onPress={onPress} />
+          {chipButton(key, text, isOn ? C.onText : C.chipText, onPress)}
         </Box>
       ) : (
         <Button key={key} label={text} variant={isOn ? 'primary' : 'secondary'} onPress={onPress} />
@@ -499,10 +596,18 @@ export const register: Register = on => {
     }
     const modes: Mode[] = ['off', 'sugerir', 'auto']
     const efforts: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max']
+    const spend = await read($, spendAtom)
+    const learned = await read($, learnedAtom)
+    const pct = spend.opusUsd > 0 ? Math.round((1 - spend.usd / spend.opusUsd) * 100) : 0
+    const onForget = async () => {
+      await forget($)
+      $.ui.toast((await t($)).forgotten)
+    }
     return (
       <Box
         flexDirection="column"
-        rowGap={1}
+        // En la terminal cada línea cuenta: sin hueco entre filas el menú cabe entero.
+        rowGap={isTerminal ? 0 : 1}
         paddingX={1}
         {...(C ? { backgroundColor: C.bg, borderStyle: 'round', borderColor: C.border } : {})}
       >
@@ -515,13 +620,19 @@ export const register: Register = on => {
             {/* Sin borde: el botón ocupa el rectángulo entero, así que al pasar el ratón se marca entero. */}
             <Box alignItems="center" columnGap={1}>
               {PALETTES.map(p => (
-                <Box key={`router-palette-${p}-chip`} width={SWATCH} height={1} overflow="hidden" backgroundColor={DOT[p]}>
+                <Box key={`router-palette-${p}-chip`} width={SWATCH} height={1} overflow="hidden" justifyContent="center" backgroundColor={DOT[p]}>
                   <Button key={`router-palette-${p}`} plain label={swatchLabel(palette === p)} onPress={() => onPalette(p)} />
                 </Box>
               ))}
             </Box>
             <Box backgroundColor={C?.chip}>
-              <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+              {C && isTerminal ? (
+                <Button key="router-close" plain label=" ✕ " role="dismiss" onPress={close}>
+                  <Text color={C.chipText}> ✕ </Text>
+                </Button>
+              ) : (
+                <Button key="router-close" label="✕" role="dismiss" onPress={close} />
+              )}
             </Box>
           </Box>
         </Box>
@@ -532,6 +643,26 @@ export const register: Register = on => {
           efforts.map(ef => opt(`router-effort-${ef}`, ef, activeEffort === ef, () => onEffort(ef))),
         )}
         {row(s.langLabel, LANGS.map(l => opt(`router-lang-${l}`, l.toUpperCase(), l === lang, () => onLang(l))))}
+        {spend.usd > 0 || learned > 0
+          ? row(s.savingsRow, [
+              ...(spend.usd > 0
+                ? [
+                    <Text key="router-spend" color={C?.text}>
+                      {s.savings(fmtUsd(spend.usd), fmtUsd(spend.opusUsd), pct)}
+                    </Text>,
+                  ]
+                : []),
+              ...(learned > 0
+                ? [
+                    <Text key="router-learned" color={C?.dim} dimColor={!C}>
+                      {spend.usd > 0 ? '· ' : ''}
+                      {s.learned(learned)}
+                    </Text>,
+                    opt('router-forget', s.forget, false, onForget),
+                  ]
+                : []),
+            ])
+          : null}
       </Box>
     )
   })
@@ -551,6 +682,15 @@ export const register: Register = on => {
       await update($, pendingAtom, () => null)
       await save($)
     }
+    // «Seguir igual» ante una propuesta del primer mensaje (cuando cambiar no costaba nada)
+    // es una corrección: aquí bastaba el modelo de ahora. A mitad de conversación no se
+    // aprende, porque rechazar puede deberse solo al coste de reprocesar.
+    const keep = async () => {
+      const cur = await current($)
+      const r = await read($, routeAtom)
+      if (cur && pending.isFirst) await learn($, pending, cur, r?.effort ?? (await read($, effortAtom)) ?? 'medium')
+      await update($, pendingAtom, () => null)
+    }
     return (
       <Box>
         <Text dimColor>
@@ -559,7 +699,7 @@ export const register: Register = on => {
           {note ? ` · ${note}` : ''}{' '}
         </Text>
         <Button key="apply" label={s.apply} onPress={accept} />
-        <Button key="keep" label={s.keep} onPress={() => update($, pendingAtom, () => null)} />
+        <Button key="keep" label={s.keep} onPress={keep} />
       </Box>
     )
   })

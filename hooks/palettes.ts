@@ -2,7 +2,8 @@ import type { Palette } from '../types'
 
 /** Color de cada rectángulo del selector de paleta.
  *  Se pintan como fondo de una caja: la app no colorea el texto de los botones. */
-export const DOT: Record<Palette, string> = { light: '#ffffff', dark: '#6e6e6e', cream: '#e8d3a8', creamDark: '#a5794f', sage: '#a8c8a0', night: '#2f4b78' }
+// El de «claro» no es blanco puro: sobre el fondo blanco de la app no se vería.
+export const DOT: Record<Palette, string> = { light: '#ebe9e3', dark: '#6e6e6e', cream: '#e8d3a8', creamDark: '#a5794f', sage: '#a8c8a0', night: '#2f4b78' }
 
 /** Ancho, en celdas, de cada rectángulo del selector de paleta. */
 export const SWATCH = 5

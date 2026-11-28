@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from 'claude-code/testing'
+import { cacheWriteUsd, costUsd } from './prices'
 
 const usage = { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }
 
@@ -76,6 +77,7 @@ test('el modo se guarda solo para esta conversación', async ($, on) => {
     mode: 'auto',
     route: { model: 'sonnet', effort: 'high', reason: '', isPinned: true },
     effort: null,
+    spend: { usd: 0, opusUsd: 0 },
   })
   expect(store['mode']).toBeUndefined()
 
@@ -188,4 +190,62 @@ test('si la cuenta no tiene Fable, fijarlo usa Opus y lo recuerda', async ($, on
   expect((store['availability'] as any).fable.isOk).toBe(false)
   await run($, 'fable')
   expect(asked.filter(m => m === 'fable').length).toBe(1) // la segunda vez sale de lo recordado
+})
+
+test('aprende de tus correcciones, se las da al clasificador y las olvida si se lo pides', async ($, on) => {
+  const store = engine(on)
+  const systems: string[] = []
+  on('prompt.submit', (_: unknown, e: any) => ({ text: e.text }))
+  on('model.complete', (_: unknown, e: any) => {
+    if (e.system) systems.push(e.system)
+    return { value: { isAnswered: true, text: '{"model":"opus","effort":"high","reason":"r"}', usage } }
+  })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  await run($, 'auto')
+  await $.prompt.submit({ text: 'redacta un correo corto a Marta para quedar el jueves', origin: { kind: 'composer' } } as any)
+  expect((store['conv:conv-A'] as any).route.model).toBe('opus')
+  await run($, 'sonnet low') // la persona corrige: para esto bastaba Sonnet
+  const saved = store['decisions'] as any[]
+  expect(saved.length).toBe(1)
+  expect(saved[0]).toMatchObject({ proposed: 'opus', chosen: 'sonnet', chosenEffort: 'low' })
+
+  await run($, 'libre')
+  await $.prompt.submit({ text: 'otro correo corto, ahora para Pedro, para cambiar la cita', origin: { kind: 'composer' } } as any)
+  expect(systems.at(-1)).toContain('the user chose sonnet low')
+
+  await run($, 'olvidar')
+  expect(store['decisions']).toEqual([])
+})
+
+test('el gasto se calcula con una sola tabla de precios', async () => {
+
+  const u = { input_tokens: 1_000_000, output_tokens: 0 }
+  expect(costUsd('opus', u)).toBe(4)
+  expect(costUsd('sonnet', { input_tokens: 0, output_tokens: 1_000_000 })).toBe(10)
+  expect(cacheWriteUsd('opus', 1_000_000)).toBe(5)
+  expect(Math.round(costUsd('haiku', { input_tokens: 200_000, output_tokens: 0 }) * 1000)).toBe(100)
+})
+
+test('el menú muestra lo gastado frente a usar siempre Opus', async ($, on) => {
+  engine(on, { lang: 'es', 'conv:conv-A': { mode: 'auto', route: null, spend: { usd: 0.5, opusUsd: 1 } } })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const foot = await $.ui.mount({ ...FOOTER, surface: 'desktop' })
+  await foot.press({ key: 'router-menu' })
+  const menu = await $.ui.mount({ ...MENU, surface: 'desktop' } as any)
+  expect((await menu.find({ type: 'Text', text: /ahorras 50%/ }))?.text).toContain('$0.50')
+  await menu.unmount()
+  await foot.unmount()
+})
+
+test('en la terminal, con paleta, el texto de las opciones lleva el color de la paleta', async ($, on) => {
+  engine(on, { lang: 'es', palette: 'night' })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  const foot = await $.ui.mount({ ...FOOTER, surface: 'terminal' })
+  await foot.press({ key: 'router-menu' })
+  const menu = await $.ui.mount({ ...MENU, surface: 'terminal' } as any)
+  const t = await menu.find({ type: 'Text', text: /Sugerir/ })
+  expect((t as any)?.props?.color ?? (t as any)?.color).toBe('#16202e')
+  await menu.press({ key: 'router-auto' })
+  await menu.unmount()
+  await foot.unmount()
 })

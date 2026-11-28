@@ -4,7 +4,11 @@
 
 **Das passende Claude-Modell und der passende Aufwand für jede Unterhaltung, nach Anthropics Leitfaden, ohne deinen Kontext heimlich neu zu verarbeiten.**
 
-![Der Knopf des Routers neben der Modellauswahl](docs/img/de/footer.svg)
+![Das Menü des Routers in Claude Code](docs/img/shots/menu-app.png)
+
+<img src="docs/img/shots/menu-sage.png" alt="Palette Salbeigrün" width="49%"> <img src="docs/img/shots/menu-night.png" alt="Palette Nachtblau" width="49%">
+
+*Echte Screenshots aus der Desktop-App (Menü auf Spanisch): Farben der App, Salbeigrün und Nachtblau.*
 
 Die meisten nutzen für alles dasselbe Modell und denselben Aufwand: Bei Einfachem zahlen sie zu viel, bei Schwierigem reicht es nicht. Dieses Plugin löst das:
 
@@ -12,6 +16,8 @@ Die meisten nutzen für alles dasselbe Modell und denselben Aufwand: Bei Einfach
 - **Haiku ordnet deine Nachricht ein**, nach den Regeln von Anthropics [*Which Claude model should you build with?*](https://claude.dev/blog/which-claude-model-should-you-build-with/): Haiku für Einfaches und Wiederkehrendes, Sonnet für klar Umrissenes, Opus als Standard, Fable nur für ehrgeizige, offene Arbeit. Der Aufwand ergibt sich aus vier Fragen: Hin und her? `low` · Teurer Fehler? `high` · Lange kritische Arbeit? `xhigh` · sonst `medium`.
 - **Keine versteckten Kosten.** Ein Modellwechsel mitten in der Unterhaltung verarbeitet den ganzen Kontext neu, weil der Cache zu jedem Modell gehört. Deshalb wechselt die Mod nur bei der **ersten Nachricht** von selbst. Danach **schlägt sie vor**, zeigt die Token-Kosten und ändert nichts, bis du *Wechseln* drückst.
 - **Günstigere Subagenten.** In *Auto* läuft Explore auf Haiku, andere allgemeine Subagenten werden eingeordnet, nie über dem Modell der Unterhaltung.
+- **Lernt deine Ziele.** Wenn du ihn korrigierst (ein anderes Modell festlegst oder bei einem Vorschlag in der ersten Nachricht *Beibehalten* wählst), speichert er den Anfang der Nachricht und deine Wahl. Die letzten 20 Korrekturen gehen als Beispiele an den Klassifizierer, der ihnen bei Ähnlichem folgt. Sie bleiben auf deinem Rechner; `/modelo olvidar` oder der Knopf *Vergessen* löscht sie.
+- **Zeigt, was du sparst.** Die Zeile *Kosten* im Menü zeigt, was diese Unterhaltung bisher gekostet hat (Klassifizierer inklusive) und was sie immer mit Opus gekostet hätte, zu Listenpreisen.
 - **Claude-Chat und Cowork: der Skill `model-advisor`.** Er sagt dir in einer Zeile, welches Modell und welcher Aufwand passen, und schreibt eine Übergabe für eine neue Unterhaltung, wenn ein Wechsel mittendrin teuer wäre. In Cowork übernimmt der Subagent `haiku-reader` das lange Lesen auf Haiku (experimentell: Coworks Dokumentation sagt noch nicht, ob das Modell des Subagenten beachtet wird).
 
 ![Vorschlag mit den Kosten eines Wechsels](docs/img/de/band.svg)
@@ -54,6 +60,8 @@ Nutze zu Beginn jeder neuen Aufgabe den Skill model-advisor, um mir in einer Zei
 | `/modelo opus high` | Fixiert Modell und Aufwand. |
 | `/modelo libre` | Zurück zum Modell der App. |
 | `/modelo idioma de` | Ändert die Sprache. |
+| Zeile *Kosten* | Kosten dieser Unterhaltung gegenüber immer Opus, und aus wie vielen deiner Entscheidungen er lernt. |
+| `/modelo olvidar` | Vergisst deine gelernten Entscheidungen (auch der Knopf *Vergessen*). |
 
 Ein Punkt (•) auf dem Knopf zeigt einen offenen Vorschlag. Die Sprache der Mod richtet sich zunächst nach der Einstellung `language` von Claude Code.
 

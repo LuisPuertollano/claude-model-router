@@ -58,7 +58,10 @@
           overflow-x: auto; text-align: center; min-height: 80px; }
   .tree svg { max-width: 100%; height: auto; }
   .tree .node polygon { fill: var(--accent-soft) !important; stroke: var(--accent) !important; }
-  .tree-grid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .shots{margin:0 0 8px}.shots .shot.real{border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.12);width:100%;height:auto;display:block;margin:0 0 12px}
+.shot-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.shots figcaption{font-size:.88em;opacity:.75;margin-top:4px}
+.tree-grid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
   footer { padding: 40px 0 60px; color: var(--muted); font-size: 14px; }
   a { color: var(--accent); }
   @media (max-width: 520px) { table { font-size: 14px; } th, td { padding: 10px; } }
@@ -88,13 +91,22 @@
     </div>
   </header>
 
-  <img class="shot" data-img="footer" src="img/en/footer.svg" alt="">
+  <figure class="shots">
+    <img class="shot real" src="img/shots/menu-app.png" alt="model-router menu in Claude Code">
+    <div class="shot-pair">
+      <img class="shot real" src="img/shots/menu-sage.png" alt="Menu in sage green">
+      <img class="shot real" src="img/shots/menu-night.png" alt="Menu in night blue">
+    </div>
+    <figcaption data-i="shotCap">Real screenshots from the Claude desktop app, with the menu in Spanish: the app's colours, sage green and night blue.</figcaption>
+  </figure>
 
   <section>
     <h2 data-i="whatH">What it does</h2>
     <div class="grid">
       <div class="card"><span class="where">Claude Code</span><h3 data-i="c1h">A ↯ button by the model picker</h3><p data-i="c1p">It opens a menu: mode for this conversation (app's model, Suggest, Auto), pin a model, effort, language, and six colour swatches beside the title for the menu's colours (light, light cream, sage green, dark cream, dark, night blue). Each conversation remembers its mode; new ones start off.</p></div>
       <div class="card"><span class="where">Claude Code</span><h3 data-i="c2h">Classified by Haiku</h3><p data-i="c2p">Model and effort from Anthropic's guide and four questions: back-and-forth? costly mistake? long critical job? otherwise medium. Generic subagents go to cheaper models.</p></div>
+      <div class="card"><span class="where">Claude Code</span><h3 data-i="c4h">Learns your goals</h3><p data-i="c4p">When you correct it (you pin another model, or keep yours when it proposes a switch on the first message), it remembers and does the same next time something similar comes up. /modelo olvidar wipes it.</p></div>
+      <div class="card"><span class="where">Claude Code</span><h3 data-i="c5h">Shows what you save</h3><p data-i="c5p">A line in the menu with what this conversation has cost and what it would have cost always on Opus, at list prices.</p></div>
       <div class="card"><span class="where">Chat · Cowork</span><h3 data-i="c3h">Model advisor skill</h3><p data-i="c3p">Tells you in one line which model and effort to pick, and writes a handoff for a new conversation when switching mid-way would re-process everything. In Cowork, a Haiku reader subagent does the long reading.</p></div>
     </div>
   </section>
@@ -146,6 +158,8 @@
       <tr><td data-i="r9a">Palette: six swatches</td><td data-i="r9b">Colours of the menu only, from light to dark (all conversations).</td></tr>
       <tr><td><code>/modelo opus high</code></td><td data-i="r6b">Pins model and effort.</td></tr>
       <tr><td><code>/modelo high</code></td><td data-i="r10b">Effort only, same as the menu.</td></tr>
+      <tr><td data-i="r11a">Spend row</td><td data-i="r11b">This conversation's cost vs. always Opus, and how many of your decisions it learns from.</td></tr>
+      <tr><td><code>/modelo olvidar</code></td><td data-i="r12b">Forgets your learned decisions (also the Forget button).</td></tr>
       <tr><td><code>/modelo libre</code></td><td data-i="r7b">Back to the app's model and effort.</td></tr>
     </table>
   </section>
@@ -197,6 +211,14 @@ const T = {
     r9a: "Paleta: seis rectángulos",
     r9b: "Solo los colores del menú, de más clara a más oscura (todas las conversaciones).",
     r10b: "Solo el esfuerzo, igual que el menú.",
+    shotCap: 'Capturas reales de la app de escritorio de Claude, con el menú en español: colores de la app, verde salvia y azul noche.',
+    c4h: 'Aprende tus objetivos',
+    c4p: 'Cuando lo corriges (fijas otro modelo, o te quedas con el tuyo cuando propone cambiar en el primer mensaje), lo recuerda y hace lo mismo la próxima vez que llegue algo parecido. /modelo olvidar lo borra.',
+    c5h: 'Muestra lo que ahorras',
+    c5p: 'Una línea en el menú con lo que lleva costado esta conversación y lo que habría costado siempre con Opus, a precios de lista.',
+    r11a: 'Fila Gasto',
+    r11b: 'Coste de esta conversación frente a siempre Opus, y de cuántas decisiones tuyas aprende.',
+    r12b: 'Olvida tus decisiones aprendidas (también el botón Olvidar).',
     r7b: "Vuelve al modelo y al esfuerzo de la app.",
     title: 'model-router · el modelo justo de Claude'
   },
@@ -242,6 +264,14 @@ const T = {
     r9a: "Palette: sechs Farbfelder",
     r9b: "Nur die Farben des Menüs, von hell nach dunkel (alle Unterhaltungen).",
     r10b: "Nur der Aufwand, wie im Menü.",
+    shotCap: 'Echte Screenshots aus der Claude-Desktop-App, Menü auf Spanisch: Farben der App, Salbeigrün und Nachtblau.',
+    c4h: 'Lernt deine Ziele',
+    c4p: 'Wenn du ihn korrigierst (ein anderes Modell festlegst oder bei einem Vorschlag in der ersten Nachricht bei deinem bleibst), merkt er es sich und macht es beim nächsten ähnlichen Fall genauso. /modelo olvidar löscht es.',
+    c5h: 'Zeigt, was du sparst',
+    c5p: 'Eine Zeile im Menü mit den bisherigen Kosten dieser Unterhaltung und dem, was sie immer mit Opus gekostet hätte, zu Listenpreisen.',
+    r11a: 'Zeile Kosten',
+    r11b: 'Kosten dieser Unterhaltung gegenüber immer Opus, und aus wie vielen deiner Entscheidungen er lernt.',
+    r12b: 'Vergisst deine gelernten Entscheidungen (auch der Knopf Vergessen).',
     r7b: "Zurück zu Modell und Aufwand der App.",
     title: 'model-router · das richtige Claude-Modell'
   },
@@ -287,6 +317,14 @@ const T = {
     r9a: "Palette : six pastilles",
     r9b: "Seulement les couleurs du menu, du clair au foncé (toutes les conversations).",
     r10b: "L’effort seul, comme dans le menu.",
+    shotCap: 'Vraies captures de l’app de bureau de Claude, menu en espagnol : couleurs de l’app, vert sauge et bleu nuit.',
+    c4h: 'Apprend tes objectifs',
+    c4p: 'Quand tu le corriges (tu fixes un autre modèle, ou tu gardes le tien quand il propose de changer au premier message), il s’en souvient et fait pareil la prochaine fois que quelque chose de semblable arrive. /modelo olvidar l’efface.',
+    c5h: 'Montre ce que tu économises',
+    c5p: 'Une ligne dans le menu avec ce qu’a coûté cette conversation et ce qu’elle aurait coûté toujours avec Opus, aux prix publics.',
+    r11a: 'Ligne Coût',
+    r11b: 'Coût de cette conversation face à toujours Opus, et de combien de tes décisions il apprend.',
+    r12b: 'Oublie tes décisions apprises (aussi le bouton Oublier).',
     r7b: "Revient au modèle et à l’effort de l’app.",
     title: 'model-router · le bon modèle Claude'
   }

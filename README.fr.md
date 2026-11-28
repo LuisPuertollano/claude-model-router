@@ -4,7 +4,11 @@
 
 **Le bon modèle Claude et le bon effort pour chaque conversation, selon le guide d’Anthropic, sans retraiter ton contexte dans ton dos.**
 
-![Le bouton du routeur près du sélecteur de modèle](docs/img/fr/footer.svg)
+![Le menu du routeur dans Claude Code](docs/img/shots/menu-app.png)
+
+<img src="docs/img/shots/menu-sage.png" alt="Palette vert sauge" width="49%"> <img src="docs/img/shots/menu-night.png" alt="Palette bleu nuit" width="49%">
+
+*Vraies captures de l’app de bureau (menu en espagnol) : couleurs de l’app, vert sauge et bleu nuit.*
 
 La plupart des gens utilisent le même modèle et le même effort pour tout : ils paient trop pour le simple et manquent de puissance pour le difficile. Ce plugin règle ça :
 
@@ -12,6 +16,8 @@ La plupart des gens utilisent le même modèle et le même effort pour tout : il
 - **Haiku classe ton message** avec les règles de [*Which Claude model should you build with?*](https://claude.dev/blog/which-claude-model-should-you-build-with/) d’Anthropic : Haiku pour le simple et répétitif, Sonnet pour le cadré, Opus par défaut, Fable seulement pour le travail ambitieux et ouvert. L’effort découle de quatre questions : allers-retours ? `low` · erreur coûteuse ? `high` · long travail critique ? `xhigh` · sinon `medium`.
 - **Pas de coûts cachés.** Changer de modèle en cours de conversation retraite tout le contexte, car le cache appartient à chaque modèle. Le mod ne change donc tout seul qu’au **premier message**. Ensuite il **suggère**, montre les tokens que ça coûterait et ne change rien tant que tu n’appuies pas sur *Changer*.
 - **Sous-agents moins chers.** En *Auto*, Explore tourne sur Haiku et les autres sous-agents génériques sont classés, jamais au-dessus du modèle de la conversation.
+- **Apprend tes objectifs.** Quand tu le corriges (tu fixes un autre modèle, ou tu choisis *Garder* quand il propose de changer au premier message), il garde le début du message et ton choix. Les 20 dernières corrections vont au classifieur comme exemples, et il les suit quand quelque chose de semblable arrive. Elles restent sur ton ordinateur ; `/modelo olvidar` ou le bouton *Oublier* les efface.
+- **Montre ce que tu économises.** La ligne *Coût* du menu indique ce qu’a coûté cette conversation (classifieur compris) et ce qu’elle aurait coûté toujours avec Opus, aux prix publics.
 - **Chat et Cowork : la skill `model-advisor`.** Elle te dit en une ligne quel modèle et quel effort choisir, et rédige un passage de relais vers une nouvelle conversation quand changer en cours coûterait cher. Dans Cowork, le sous-agent `haiku-reader` fait la lecture longue sur Haiku (expérimental : la doc de Cowork ne dit pas encore s’il respecte le modèle du sous-agent).
 
 ![Suggestion avec le coût du changement](docs/img/fr/band.svg)
@@ -54,6 +60,8 @@ Au début de chaque nouvelle tâche, utilise la skill model-advisor pour me dire
 | `/modelo opus high` | Fixe modèle et effort. |
 | `/modelo libre` | Revient au modèle de l’app. |
 | `/modelo idioma fr` | Change la langue. |
+| Ligne *Coût* | Coût de cette conversation face à toujours Opus, et de combien de tes décisions il apprend. |
+| `/modelo olvidar` | Oublie tes décisions apprises (aussi le bouton *Oublier*). |
 
 Un point (•) sur le bouton signale une suggestion en attente. La langue du mod part du réglage `language` de Claude Code.
 

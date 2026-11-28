@@ -4,7 +4,11 @@
 
 **The right Claude model and effort for each conversation, following Anthropic's guide, without re-processing your context behind your back.**
 
-![The router's button next to the model picker](docs/img/en/footer.svg)
+![The router's menu in Claude Code](docs/img/shots/menu-app.png)
+
+<img src="docs/img/shots/menu-sage.png" alt="Sage green palette" width="49%"> <img src="docs/img/shots/menu-night.png" alt="Night blue palette" width="49%">
+
+*Real screenshots from the desktop app (menu in Spanish): the app's colours, sage green and night blue.*
 
 Most people run everything on the same model and effort: they overpay on simple work and fall short on hard work. This plugin fixes that:
 
@@ -12,6 +16,8 @@ Most people run everything on the same model and effort: they overpay on simple 
 - **Haiku classifies your message** with the rules of Anthropic's [*Which Claude model should you build with?*](https://claude.dev/blog/which-claude-model-should-you-build-with/): Haiku for simple and repetitive work, Sonnet for scoped tasks, Opus by default, Fable only for ambitious open-ended work. Effort comes from four questions: back-and-forth? `low` · costly mistake? `high` · long critical job? `xhigh` · otherwise `medium`.
 - **No hidden costs.** Switching model mid-conversation re-processes the whole context, because the cache belongs to each model. So the mod only switches by itself on the **first message**. After that it **suggests**, shows the tokens a switch would cost, and changes nothing until you press *Switch*.
 - **Cheaper subagents.** In *Auto*, Explore runs on Haiku and other generic subagents are classified, never above the conversation's model.
+- **Learns your goals.** When you correct it (you pin another model, or pick *Keep* when it proposes a switch on the first message), it saves the start of the message and what you chose. The last 20 corrections go to the classifier as examples, and it follows them when something similar comes up. They stay on your computer; `/modelo olvidar` or the *Forget* button wipes them.
+- **Shows what you save.** The menu's *Spend* row says what this conversation has cost so far (classifier included) and what it would have cost always on Opus, at list prices.
 - **Claude chat and Cowork — the `model-advisor` skill.** It tells you in one line which model and effort to pick, and writes a handoff for a new conversation when switching mid-way would be expensive. In Cowork, the `haiku-reader` subagent does long reading on Haiku (experimental: Cowork's docs don't say yet whether it honors the subagent's model).
 
 ![Suggestion with the cost of switching](docs/img/en/band.svg)
@@ -54,6 +60,8 @@ At the start of each new task, use the model-advisor skill to tell me in one lin
 | `/modelo opus high` | Pins model and effort. |
 | `/modelo libre` | Back to the app's model. |
 | `/modelo idioma de` | Changes the language. |
+| *Spend* row | This conversation's cost vs. always Opus, and how many of your decisions it learns from. |
+| `/modelo olvidar` | Forgets your learned decisions (also the *Forget* button). |
 
 A dot (•) on the button means a suggestion is waiting. The mod's language starts from Claude Code's `language` setting.
 
